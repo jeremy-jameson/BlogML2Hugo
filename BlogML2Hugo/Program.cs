@@ -137,10 +137,6 @@ namespace BlogML2Hugo
             header.AppendLine("]");
             // header.AppendLine("isCJKLanguage: true");
 
-            if (post.HasExcerpt)
-            {
-                header.AppendLine("]");    
-            }
             
             header.AppendLine("---");
             return header.ToString();
