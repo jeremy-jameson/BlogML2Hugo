@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Mime;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Serialization;
 using BlogML.Xml;
 using Html2Markdown;
-using Html2Markdown.Replacement;
-using Html2Markdown.Scheme;
 
 namespace BlogML2Hugo
 {
@@ -18,9 +16,48 @@ namespace BlogML2Hugo
     {
         static void Main(string[] args)
         {
-            var inputXml = "blogml.xml";
-            var outDir = "/content/post/of/hugo/";
+            if (args.Length < 2)
+            {
+                PrintError("Please specify BlogML xml file and output directory for coverted markdown files.");
+                Environment.Exit(1);
+            }
+
+            var inputXml = args[0];
+            var outDir = args[1];
+            if (!File.Exists(inputXml))
+            {
+                PrintError($"File '{inputXml}' does not exisit.");
+                Environment.Exit(1);
+            }
+            
+            try
+            {
+                if (!Directory.Exists(outDir))
+                {
+                    Directory.CreateDirectory(outDir);
+                }
                 
+                ConvertBlog(inputXml, outDir);
+            }
+            catch (Exception ex)
+            {
+                PrintError($"Error processing '{inputXml}':");
+                PrintError(ex.Message);
+                PrintError(ex.StackTrace);
+                Environment.Exit(2);
+            }
+        }
+
+        static void PrintError(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.Error.WriteLine(message);
+            
+            Console.ResetColor();
+        }
+
+        static void ConvertBlog(string inputXml, string outDir)
+        {
             BlogMLBlog blog;
             using (var fs = File.OpenRead(inputXml))
             {
@@ -32,14 +69,17 @@ namespace BlogML2Hugo
             using (XmlTextReader tr = new XmlTextReader(inputXml))
             {
                 tr.Namespaces = false;
-                blogDoc.Load(inputXml);  
+                blogDoc.Load(inputXml);
             }
+
+
+            var categories = blog.Categories
+                .Select(cat => new CategoryRef {Title = cat.Title, Id = cat.ID})
+                .ToDictionary(x => x.Id);
             
-            
-            var categories = blog.Categories.Select(cat => new CategoryRef{Title = cat.Title, Id = cat.ID}).ToDictionary(x => x.Id);
 //            var mdConverter = new Converter(new DivPScheme());
             var mdConverter = new Converter();
-            
+
             blog.Posts.ForEach(post =>
             {
                 var slug = post.PostUrl.Substring(post.PostUrl.LastIndexOf('/') + 1);
@@ -49,33 +89,37 @@ namespace BlogML2Hugo
                 var markdown = mdConverter.Convert(post.Content.UncodedText);
 
                 Console.WriteLine($"Writing {slug} ({post.Title})");
-                
-                var outputFile = Path.Combine(outDir, slug + ".md");
-                using (var file = File.OpenWrite(outputFile))
-                using (var writer = new StreamWriter(file))
-                {
-                    writer.WriteLine();
-                    writer.Write(header);
-                    writer.Flush();
-                    
-                    writer.WriteLine();
-                    writer.WriteLine();
-                    
-                    writer.WriteLine(markdown);
-                    writer.WriteLine();
-                }
+
+                WriteConvertedMarkdown(outDir, slug, header, markdown);
             });
-            
         }
 
-        private static string ComposeBlogHeader(BlogMLPost post, Dictionary<string, CategoryRef> categories, IEnumerable<string> tags)
+        static void WriteConvertedMarkdown(string outDir, string slug, string header, string markdown)
+        {
+            var outputFile = Path.Combine(outDir, slug + ".md");
+            
+            using (var file = File.OpenWrite(outputFile))
+            using (var writer = new StreamWriter(file))
+            {
+                writer.WriteLine();
+                writer.Write(header);
+                writer.Flush();
+
+                writer.WriteLine();
+                writer.WriteLine();
+
+                writer.WriteLine(markdown);
+                writer.WriteLine();
+            }
+        }
+
+        static string ComposeBlogHeader(BlogMLPost post, Dictionary<string, CategoryRef> categories, IEnumerable<string> tags)
         {
             var header = new StringBuilder("---");
             header.AppendLine();
             header.AppendLine($"title: \"{post.Title}\"");
             header.AppendLine($"date: {post.DateCreated:yyyy-MM-ddTHH:mm:ss}+08:00");
             header.AppendLine($"lastmod: {post.DateModified:yyyy-MM-ddTHH:mm:ss}+08:00");
-            // header.AppendLine($"description: \"{post.}\"");   post.Excerpt
             header.AppendLine($"draft: false");
             header.Append($"categories: [");
             foreach (BlogMLCategoryReference category in post.Categories)
@@ -91,7 +135,7 @@ namespace BlogML2Hugo
                 header.Append($"\"{tag}\", ");
             }
             header.AppendLine("]");
-            header.AppendLine("isCJKLanguage: true");
+            // header.AppendLine("isCJKLanguage: true");
 
             if (post.HasExcerpt)
             {
@@ -123,90 +167,5 @@ namespace BlogML2Hugo
         }
         
         
-    }
-
-    internal class DivPScheme : IScheme
-    {
-        public IList<IReplacer> Replacers()
-        {
-            var replacers = new List<IReplacer>(new Markdown().Replacers());
-            replacers.Add(new RegexReplacer
-            {
-                Pattern = @"<(div|p)[\s""'=a-zA-Z\-_0-9%#]*?>",
-                Replacement = string.Empty
-            });
-            
-            replacers.Add(new RegexReplacer
-            {
-                Pattern = @"</(div|p)\s*?>",
-                Replacement = Environment.NewLine
-            });
-            
-//            replacers.Add(new RegexMatchReplacer
-//            {
-//                Pattern = @"/(image|file)\.axd\?(picture|file)\=[a-zA-Z0-9%.\-_\s]+(\s""image"")?\)",
-//                Match = "%2[fF]",
-//                Replacement = "/"
-//            });
-//            replacers.Add(new RegexMatchReplacer
-//            {
-//                Pattern = @"/(image|file)\.axd\?(picture|file)\=[a-zA-Z0-9%/.\-_\s]+(\s""image"")?\)",
-//                Match = @"/(image|file)\.axd\?(picture|file)\=",
-//                Replacement = "/files/"
-//            });
-
-            return replacers;
-        }
-    }
-    
-    internal class RegexReplacer : IReplacer
-    {
-        public string Pattern { get; set; }
-
-        public string Replacement { get; set; }
-
-        public string Replace(string html)
-        {
-            return new Regex(this.Pattern).Replace(html, this.Replacement);
-        }
-    }
-    
-    internal class RegexMatchReplacer : IReplacer
-    {
-        public string Pattern { get; set; }
-        
-        public string Match { get; set; }
-
-        public string Replacement { get; set; }
-
-        public string Replace(string html)
-        {
-            var regex = new Regex(this.Pattern);
-            var matchRegex = new Regex(this.Match);
-            
-            var matches = regex.Matches(html);
-
-            var resultBuilder = new StringBuilder();
-            var lastIndex = 0;
-
-            var allMatches = matches.Where(match => match.Success).OrderBy(match => match.Index).ToList();
-            foreach (var match in allMatches)
-            {
-                resultBuilder.Append(html.Substring(lastIndex, match.Index - lastIndex));
-                lastIndex = lastIndex + match.Length;
-                    
-                var replaced = matchRegex.Replace(match.Value, this.Replacement);
-                resultBuilder.Append(replaced);
-            }
-            
-            resultBuilder.Append(html.Substring(lastIndex, html.Length - lastIndex));
-            return resultBuilder.ToString();
-        }
-    }
-
-    internal class CategoryRef
-    {
-        public string Id { get; set; }
-        public string Title { get; set; }
     }
 }
