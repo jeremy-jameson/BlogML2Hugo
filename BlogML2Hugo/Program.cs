@@ -150,6 +150,16 @@ namespace BlogML2Hugo
             header.AppendLine($"title: \"{escapedTitle}\"");
             header.AppendLine($"date: {post.DateCreated:yyyy-MM-ddTHH:mm:ss}+08:00");
             header.AppendLine($"lastmod: {post.DateModified:yyyy-MM-ddTHH:mm:ss}+08:00");
+
+            if (post.HasExcerpt)
+            {
+                var escapedExcerpt = post.Excerpt.UncodedText
+                    .Replace(@"\", @"\\")
+                    .Replace("\"", "\\\"");
+
+                header.AppendLine($"excerpt: \"{escapedExcerpt}\"");
+            }
+
             header.AppendLine($"draft: false");
 
             var categoryList = new List<string>();
