@@ -119,7 +119,10 @@ namespace BlogML2Hugo
         {
             var header = new StringBuilder("---");
             header.AppendLine();
-            header.AppendLine($"title: \"{post.Title}\"");
+
+            var escapedTitle = post.Title.Replace("\"", "\\\"");
+
+            header.AppendLine($"title: \"{escapedTitle}\"");
             header.AppendLine($"date: {post.DateCreated:yyyy-MM-ddTHH:mm:ss}+08:00");
             header.AppendLine($"lastmod: {post.DateModified:yyyy-MM-ddTHH:mm:ss}+08:00");
             header.AppendLine($"draft: false");
