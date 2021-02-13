@@ -26,14 +26,14 @@ namespace BlogML2Hugo
                 PrintError($"File '{inputXml}' does not exisit.");
                 Environment.Exit(1);
             }
-            
+
             try
             {
                 if (!Directory.Exists(outDir))
                 {
                     Directory.CreateDirectory(outDir);
                 }
-                
+
                 ConvertBlog(inputXml, outDir);
             }
             catch (Exception ex)
@@ -49,7 +49,7 @@ namespace BlogML2Hugo
         {
             Console.ForegroundColor = ConsoleColor.DarkRed;
             Console.Error.WriteLine(message);
-            
+
             Console.ResetColor();
         }
 
@@ -71,7 +71,7 @@ namespace BlogML2Hugo
 
 
             var categories = blog.Categories
-                .Select(cat => new CategoryRef {Title = cat.Title, Id = cat.ID})
+                .Select(cat => new CategoryRef { Title = cat.Title, Id = cat.ID })
                 .ToDictionary(x => x.Id);
 
             var mdConverter = new Converter();
@@ -93,7 +93,7 @@ namespace BlogML2Hugo
         static void WriteConvertedMarkdown(string outDir, string slug, string header, string markdown)
         {
             var outputFile = Path.Combine(outDir, slug + ".md");
-            
+
             using (var file = File.OpenWrite(outputFile))
             using (var writer = new StreamWriter(file))
             {
@@ -133,7 +133,7 @@ namespace BlogML2Hugo
             header.AppendLine("]");
             // header.AppendLine("isCJKLanguage: true");
 
-            
+
             header.AppendLine("---");
             return header.ToString();
         }
@@ -142,14 +142,14 @@ namespace BlogML2Hugo
         {
 
             var tags = new List<string>();
-            var root = blogMLDoc.DocumentElement; 
+            var root = blogMLDoc.DocumentElement;
             var mgr = new XmlNamespaceManager(blogMLDoc.NameTable);
             mgr.AddNamespace("xs", "http://www.w3.org/2001/XMLSchema");
             mgr.AddNamespace("blogml", "http://www.blogml.com/2006/09/BlogML");
-            
+
 
             var tagList = root.SelectNodes($"//blogml:post[@id='{postId}']/blogml:tags/blogml:tag", mgr);
-            
+
             foreach (XmlNode tag in tagList)
             {
                 tags.Add(tag.Attributes["ref"].InnerText);
@@ -157,7 +157,7 @@ namespace BlogML2Hugo
 
             return tags;
         }
-        
-        
+
+
     }
 }
