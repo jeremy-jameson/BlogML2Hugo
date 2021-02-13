@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Mime;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml;
-using System.Xml.Serialization;
 using BlogML.Xml;
-using Html2Markdown;
+using ReverseMarkdown;
 
 namespace BlogML2Hugo
 {
@@ -76,8 +73,7 @@ namespace BlogML2Hugo
             var categories = blog.Categories
                 .Select(cat => new CategoryRef {Title = cat.Title, Id = cat.ID})
                 .ToDictionary(x => x.Id);
-            
-//            var mdConverter = new Converter(new DivPScheme());
+
             var mdConverter = new Converter();
 
             blog.Posts.ForEach(post =>
