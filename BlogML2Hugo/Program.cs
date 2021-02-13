@@ -106,7 +106,18 @@ namespace BlogML2Hugo
 
                 Console.WriteLine($"Writing {slug} ({post.Title})");
 
-                WriteConvertedMarkdown(outDir, slug, header, markdown);
+                // Organize blog posts by year/month/day
+                var subfolder = $"{post.DateCreated:yyyy-MM-dd}"
+                    .Replace("-", "\\");
+
+                var postDir = Path.Combine(outDir, subfolder);
+
+                if (!Directory.Exists(postDir))
+                {
+                    Directory.CreateDirectory(postDir);
+                }
+
+                WriteConvertedMarkdown(postDir, slug, header, markdown);
             });
         }
 
