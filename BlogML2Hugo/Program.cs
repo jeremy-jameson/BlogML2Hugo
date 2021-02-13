@@ -79,6 +79,12 @@ namespace BlogML2Hugo
             blog.Posts.ForEach(post =>
             {
                 var slug = post.PostUrl.Substring(post.PostUrl.LastIndexOf('/') + 1);
+
+                if (slug.EndsWith(".aspx"))
+                {
+                    slug = slug.Remove(slug.Length - ".aspx".Length);
+                }
+
                 var tags = GetTags(blogDoc, post.ID);
 
                 var header = ComposeBlogHeader(post, categories, tags);
