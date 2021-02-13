@@ -126,19 +126,26 @@ namespace BlogML2Hugo
             header.AppendLine($"date: {post.DateCreated:yyyy-MM-ddTHH:mm:ss}+08:00");
             header.AppendLine($"lastmod: {post.DateModified:yyyy-MM-ddTHH:mm:ss}+08:00");
             header.AppendLine($"draft: false");
-            header.Append($"categories: [");
+
+            var categoryList = new List<string>();
+
             foreach (BlogMLCategoryReference category in post.Categories)
             {
                 var cat = categories[category.Ref];
-                header.Append($"\"{cat.Title}\", ");
+                categoryList.Add(cat.Title);
             }
+
+            var joinedCategories = "\"" + string.Join("\", \"", categoryList) + "\"";
+
+            header.Append($"categories: [");
+            header.Append(joinedCategories);
             header.AppendLine("]");
 
             header.Append($"tags: [");
-            foreach (string tag in tags)
-            {
-                header.Append($"\"{tag}\", ");
-            }
+
+            var joinedTags = "\"" + string.Join("\", \"", tags) + "\"";
+
+            header.Append(joinedTags);
             header.AppendLine("]");
             // header.AppendLine("isCJKLanguage: true");
 
