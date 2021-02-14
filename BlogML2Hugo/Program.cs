@@ -289,6 +289,7 @@ namespace BlogML2Hugo
 
         private static void MassageTechnologyToolboxBlogPost(HtmlDocument doc)
         {
+            FixSpacesInsideEmphasisElements(doc);
             MassageTechnologyToolboxBlogConsoleBlocks(doc);
             MassageTechnologyToolboxBlogLinks(doc);
         }
@@ -357,6 +358,74 @@ namespace BlogML2Hugo
                         }
                     }
                 }
+            }
+        }
+
+        private static void FixSpacesInsideEmphasisElements(HtmlDocument doc)
+        {
+            // Replaces HTML content similar to the following:
+            //
+            //   ...click the <b>Advanced </b>button...
+            //
+            // with:
+            //
+            //   ...click the <b>Advanced</b> button...
+
+            var nodes = doc.DocumentNode.SelectNodes(
+                "//b[text() != normalize-space()]");
+
+            if (nodes != null)
+            {
+                FixSpacesInsideEmphasisElements(nodes);
+            }
+
+            nodes = doc.DocumentNode.SelectNodes(
+                "//i[text() != normalize-space()]");
+
+            if (nodes != null)
+            {
+                FixSpacesInsideEmphasisElements(nodes);
+            }
+
+            nodes = doc.DocumentNode.SelectNodes(
+                "//strong[text() != normalize-space()]");
+
+            if (nodes != null)
+            {
+                FixSpacesInsideEmphasisElements(nodes);
+            }
+        }
+
+        private static void FixSpacesInsideEmphasisElements(
+            HtmlNodeCollection nodes)
+        {
+            // Replaces HTML content similar to the following:
+            //
+            //   ...click the <b>Advanced </b>button...
+            //
+            // with:
+            //
+            //   ...click the <b>Advanced</b> button...
+
+            foreach (var node in nodes)
+            {
+                node.ChildNodes.ToList().ForEach((child) =>
+                {
+                    if (child.Name == "#text")
+                    {
+                        var trimmedText = child.InnerText.TrimEnd();
+
+                        if (trimmedText != child.InnerText)
+                        {
+                            var newTextNode = node.OwnerDocument
+                                .CreateTextNode(" ");
+
+                            child.InnerHtml = trimmedText;
+
+                            node.ParentNode.InsertAfter(newTextNode, node);
+                        }                            
+                    }
+                });
             }
         }
     }
