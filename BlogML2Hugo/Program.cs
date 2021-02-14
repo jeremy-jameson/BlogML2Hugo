@@ -90,16 +90,18 @@ namespace BlogML2Hugo
 
                 var postHtml = post.Content.UncodedText;
 
+                var htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(postHtml);
+
+                MassageTechnologyToolboxBlogPost(htmlDoc);
+
                 if (tags.Count == 0)
                 {
-                    var htmlDoc = new HtmlDocument();
-                    htmlDoc.LoadHtml(postHtml);
-
                     tags = GetTagsFromPostContent(htmlDoc);
                     RemoveTagsFromPostContent(htmlDoc);
-
-                    postHtml = htmlDoc.DocumentNode.OuterHtml;
                 }
+
+                postHtml = htmlDoc.DocumentNode.OuterHtml;
 
                 var header = ComposeBlogHeader(post, categories, tags);
                 var markdown = mdConverter.Convert(postHtml);
@@ -270,6 +272,40 @@ namespace BlogML2Hugo
             if (tagsHeading != null)
             {
                 tagsHeading.Remove();
+            }
+        }
+
+        private static void MassageTechnologyToolboxBlogPost(HtmlDocument doc)
+        {
+            var links = doc.DocumentNode.SelectNodes("//a");
+
+            if (links != null)
+            {
+                foreach (var link in links)
+                {
+                    if (link.Attributes.Contains("href"))
+                    {
+                        var href = link.Attributes["href"].Value;
+                        
+                        if (href.StartsWith(
+                            "/blog/jjameson/archive/",
+                            StringComparison.OrdinalIgnoreCase) == true)
+                        {
+                            href = href.Replace(
+                                "/blog/jjameson/archive/",
+                                "/blog/jjameson/");
+
+                            if (href.EndsWith(
+                                ".aspx",
+                                StringComparison.OrdinalIgnoreCase) == true)
+                            {
+                                href = href.Remove(href.Length - ".aspx".Length);
+                            }
+
+                            link.Attributes["href"].Value = href;
+                        }
+                    }
+                }
             }
         }
     }
