@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="blogml" Version="2.2.0" />
+    <PackageReference Include="Markdig" Version="0.23.0" />
     <PackageReference Include="ReverseMarkdown" Version="3.18.0" />
   </ItemGroup>
 </Project>

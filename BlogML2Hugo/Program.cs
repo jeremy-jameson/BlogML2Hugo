@@ -6,6 +6,7 @@ using System.Text;
 using System.Xml;
 using BlogML.Xml;
 using HtmlAgilityPack;
+using Markdig;
 using ReverseMarkdown;
 
 namespace BlogML2Hugo
@@ -111,7 +112,7 @@ namespace BlogML2Hugo
                 var header = ComposeBlogHeader(post, categories, tags);
                 var markdown = mdConverter.Convert(postHtml);
 
-                markdown = markdown.Trim(Environment.NewLine.ToCharArray());
+                markdown = Markdown.Normalize(markdown);
 
                 Console.WriteLine($"Writing {slug} ({post.Title})");
 
