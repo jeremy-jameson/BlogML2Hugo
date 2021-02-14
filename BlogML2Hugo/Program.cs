@@ -129,6 +129,11 @@ namespace BlogML2Hugo
         {
             var outputFile = Path.Combine(outDir, slug + ".md");
 
+            if (File.Exists(outputFile) == true)
+            {
+                File.Delete(outputFile);
+            }
+
             using (var file = File.OpenWrite(outputFile))
             using (var writer = new StreamWriter(file))
             {
