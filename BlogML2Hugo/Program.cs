@@ -75,7 +75,12 @@ namespace BlogML2Hugo
                 .Select(cat => new CategoryRef { Title = cat.Title, Id = cat.ID })
                 .ToDictionary(x => x.Id);
 
-            var mdConverter = new Converter();
+            var config = new ReverseMarkdown.Config
+            {
+                GithubFlavored = true,
+            };
+
+            var mdConverter = new Converter(config);
 
             blog.Posts.ForEach(post =>
             {
