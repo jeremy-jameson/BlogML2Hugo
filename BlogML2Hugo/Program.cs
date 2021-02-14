@@ -104,6 +104,8 @@ namespace BlogML2Hugo
                 var header = ComposeBlogHeader(post, categories, tags);
                 var markdown = mdConverter.Convert(postHtml);
 
+                markdown = markdown.Trim(Environment.NewLine.ToCharArray());
+
                 Console.WriteLine($"Writing {slug} ({post.Title})");
 
                 // Organize blog posts by year/month/day
@@ -128,11 +130,9 @@ namespace BlogML2Hugo
             using (var file = File.OpenWrite(outputFile))
             using (var writer = new StreamWriter(file))
             {
-                writer.WriteLine();
                 writer.Write(header);
                 writer.Flush();
 
-                writer.WriteLine();
                 writer.WriteLine();
 
                 writer.WriteLine(markdown);
