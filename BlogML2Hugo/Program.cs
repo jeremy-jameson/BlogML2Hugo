@@ -164,7 +164,8 @@ namespace BlogML2Hugo
                 header.AppendLine($"excerpt: \"{escapedExcerpt}\"");
             }
 
-            header.AppendLine($"draft: false");
+            // TODO: Remove "draft" from front matter for final conversion
+            header.AppendLine($"draft: true");
 
             var categoryList = new List<string>();
 
