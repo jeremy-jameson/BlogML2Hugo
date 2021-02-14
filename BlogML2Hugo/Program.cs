@@ -115,6 +115,8 @@ namespace BlogML2Hugo
 
                 markdown = Markdown.Normalize(markdown);
 
+                markdown = RemoveTrailingSpacesFromEmptyBlockquoteLines(markdown);
+
                 Console.WriteLine($"Writing {slug} ({post.Title})");
 
                 // Organize blog posts by year/month/day
@@ -257,6 +259,19 @@ namespace BlogML2Hugo
             }
 
             return tags;
+        }
+
+        private static string RemoveTrailingSpacesFromEmptyBlockquoteLines(
+            string markdown)
+        {
+            int index = markdown.IndexOf("\n" + "> " + "\n");
+
+            if (index == -1)
+            {
+                return markdown;
+            }
+
+            return markdown.Replace("\n> \n", "\n>\n");
         }
 
         private static void RemoveTagsFromPostContent(HtmlDocument doc)
