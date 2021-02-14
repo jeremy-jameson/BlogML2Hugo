@@ -282,6 +282,11 @@ namespace BlogML2Hugo
 
         private static void MassageTechnologyToolboxBlogPost(HtmlDocument doc)
         {
+            MassageTechnologyToolboxBlogLinks(doc);
+        }
+
+        private static void MassageTechnologyToolboxBlogLinks(HtmlDocument doc)
+        {
             var links = doc.DocumentNode.SelectNodes("//a");
 
             if (links != null)
