@@ -291,7 +291,6 @@ namespace BlogML2Hugo
         {
             MassageTechnologyToolboxBlogConsoleBlocks(doc);
             MassageTechnologyToolboxBlogLinks(doc);
-            NormalizeWhitespaceInParagraphs(doc);
         }
 
         private static void MassageTechnologyToolboxBlogConsoleBlocks(HtmlDocument doc)
@@ -357,48 +356,6 @@ namespace BlogML2Hugo
                             link.Attributes["href"].Value = href;
                         }
                     }
-                }
-            }
-        }
-
-        private static void NormalizeWhitespaceInParagraphs(
-            HtmlDocument doc)
-        {
-            // Replaces HTML content similar to the following:
-            //
-            //   <p>Some     <i>cool</i>                  <b>content</b>
-            //     <a href="#">...</a>...
-            //   </p>
-            //
-            // with:
-            //
-            //   <p>Some <i>cool</i> <b>content</b> <a href='#'>...</a>... </p>
-
-            var nodes = doc.DocumentNode.SelectNodes(
-                "//p[text() != normalize-space()]");
-
-            if (nodes != null)
-            {
-                foreach (var node in nodes)
-                {
-                    node.ChildNodes.ToList().ForEach((child) =>
-                    {
-                        if (child.Name == "#text")
-                        {
-                            var normalizedText = child.InnerHtml
-                                .Replace(Environment.NewLine, " ")
-                                .Replace("\t", " ");
-
-                            while (normalizedText.IndexOf("  ") != -1)
-                            {
-                                normalizedText = normalizedText.Replace("  ", " ");
-                            }
-
-                            Debug.Assert(normalizedText.IndexOf("  ") == -1);
-
-                            child.InnerHtml = normalizedText;
-                        }
-                    });
                 }
             }
         }
