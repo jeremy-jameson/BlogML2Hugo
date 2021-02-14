@@ -282,7 +282,41 @@ namespace BlogML2Hugo
 
         private static void MassageTechnologyToolboxBlogPost(HtmlDocument doc)
         {
+            MassageTechnologyToolboxBlogConsoleBlocks(doc);
             MassageTechnologyToolboxBlogLinks(doc);
+        }
+
+        private static void MassageTechnologyToolboxBlogConsoleBlocks(HtmlDocument doc)
+        {
+            // Replaces blog post content similar to the following:
+            //
+            //   <div class="consoleBlock">
+            //     <kbd>robocopy ...</kbd></div>
+            //
+            // with:
+            //
+            //   <div class="consoleBlock">
+            //     <pre><code>robocopy ...</code></pre></div>
+
+            var elements = doc.DocumentNode.SelectNodes("//div[@class = 'consoleBlock']/kbd");
+
+            if (elements != null)
+            {
+                foreach (var element in elements)
+                {
+                    element.Name = "code";
+
+                    var parent = element.ParentNode;
+
+                    element.Remove();
+
+                    var newElement = doc.CreateElement("pre");
+
+                    newElement.ChildNodes.Add(element);
+
+                    parent.ChildNodes.Add(newElement);
+                }
+            }
         }
 
         private static void MassageTechnologyToolboxBlogLinks(HtmlDocument doc)
