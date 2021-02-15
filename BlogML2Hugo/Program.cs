@@ -517,7 +517,7 @@ namespace BlogML2Hugo
         {
             // Replaces HTML content similar to the following:
             //
-            //   ...click the <b>Advanced </b>button...
+            //   ...click the<b> Advanced </b>button...
             //
             // with:
             //
@@ -534,7 +534,39 @@ namespace BlogML2Hugo
                 {
                     if (child.Name == "#text")
                     {
-                        var trimmedText = child.InnerText.TrimEnd();
+                        var trimmedText = child.InnerText.TrimStart();
+
+                        if (trimmedText != child.InnerText)
+                        {
+                            var emphasisNode = child.ParentNode;
+                            HtmlNode whitespaceTextNode = null;
+
+                            if (emphasisNode.PreviousSibling != null
+                                && emphasisNode.PreviousSibling.Name == "#text")
+                            {
+                                var textNode = emphasisNode.PreviousSibling;
+
+                                if (textNode.InnerText.TrimEnd()
+                                    != textNode.InnerText)
+                                {
+                                    whitespaceTextNode = textNode;
+                                }
+                            }
+
+                            child.InnerHtml = trimmedText;
+
+                            if (whitespaceTextNode == null)
+                            {
+                                whitespaceTextNode = node.OwnerDocument
+                                    .CreateTextNode(" ");
+
+                                node.ParentNode.InsertBefore(
+                                    whitespaceTextNode,
+                                    node);
+                            }
+                        }
+
+                        trimmedText = child.InnerText.TrimEnd();
 
                         if (trimmedText != child.InnerText)
                         {
