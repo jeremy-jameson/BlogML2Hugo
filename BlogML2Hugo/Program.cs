@@ -261,6 +261,38 @@ namespace BlogML2Hugo
             return tags;
         }
 
+        private static void NormalizeWhitespaceInChildTextNodes(HtmlNode node)
+        {
+            // Replaces HTML content similar to the following:
+            //
+            //   <p>Some     <i>cool</i>                  <b>content</b>
+            //     <a href="#">...</a>...
+            //   </p>
+            //
+            // with:
+            //
+            //   <p>Some <i>cool</i> <b>content</b> <a href='#'>...</a>... </p>
+
+            node.ChildNodes.ToList().ForEach((child) =>
+            {
+                if (child.Name == "#text")
+                {
+                    var normalizedText = child.InnerHtml
+                        .Replace(Environment.NewLine, " ")
+                        .Replace("\t", " ");
+
+                    while (normalizedText.IndexOf("  ") != -1)
+                    {
+                        normalizedText = normalizedText.Replace("  ", " ");
+                    }
+
+                    Debug.Assert(normalizedText.IndexOf("  ") == -1);
+
+                    child.InnerHtml = normalizedText;
+                }
+            });
+        }
+
         private static string RemoveTrailingSpacesFromEmptyBlockquoteLines(
             string markdown)
         {
@@ -305,8 +337,63 @@ namespace BlogML2Hugo
         private static void MassageTechnologyToolboxBlogPost(HtmlDocument doc)
         {
             FixSpacesInsideEmphasisElements(doc);
+            MassageTechnologyToolboxBlogCallouts(doc);
             MassageTechnologyToolboxBlogConsoleBlocks(doc);
             MassageTechnologyToolboxBlogLinks(doc);
+        }
+
+        private static void MassageTechnologyToolboxBlogCallouts(HtmlDocument doc)
+        {
+            // Replaces blog post content similar to the following:
+            //
+            //   <blockquote class="note important">
+            //       <div class="noteTitle">
+            //         <strong>Important</strong></div>
+            //       <div class="noteBody">
+            //         Lorem ipsum
+            //         dolor sit amet...
+            //       </div>
+            //   </blockquote>
+            //
+            // with:
+            //
+            //   <blockquote class="note important">
+            //       <div class="noteTitle">
+            //         <strong>Important</strong></div>
+            //       <div class="noteBody">
+            //         <p>Lorem ipsum dolor sit amet...</p></div>
+            //   </blockquote>
+            //
+            // Note that without the <p> element in the note body, the Markdown
+            // conversion results in extra indentation -- which causes the note
+            // body to be interpreted as code.
+
+            var elements = doc.DocumentNode.SelectNodes(
+                "//blockquote[starts-with(@class, 'note')]/div[@class != 'noteTitle']");
+
+            if (elements != null)
+            {
+                foreach (var element in elements)
+                {
+                    var noteBody = element;
+
+                    if (noteBody.FirstChild.Name != "p")
+                    {
+                        var newElement = doc.CreateElement("p");
+
+                        noteBody.ChildNodes.ToList().ForEach(childNode =>
+                        {
+                            childNode.Remove();
+
+                            newElement.AppendChild(childNode);
+                        });
+
+                        NormalizeWhitespaceInChildTextNodes(newElement);
+
+                        noteBody.AppendChild(newElement);
+                    }
+                }
+            }
         }
 
         private static void MassageTechnologyToolboxBlogConsoleBlocks(HtmlDocument doc)
