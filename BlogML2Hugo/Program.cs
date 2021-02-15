@@ -644,6 +644,21 @@ namespace BlogML2Hugo
             }
         }
 
+        private static void RemoveIndentation(
+            HtmlNode node)
+        {
+            if (node.PreviousSibling != null
+                && node.PreviousSibling.Name == "#text")
+            {
+                var previousText = node.PreviousSibling.InnerText;
+
+                if (string.IsNullOrWhiteSpace(previousText) == true)
+                {
+                    node.PreviousSibling.Remove();
+                }
+            }
+        }
+
         private static void ReplaceTechnologyToolboxBlogImages(HtmlDocument doc)
         {
             // Replaces blog post content similar to the following:
@@ -818,9 +833,23 @@ namespace BlogML2Hugo
 
                     var referenceShortcode = sb.ToString();
 
-                    referenceDiv.AppendChild(
-                        doc.CreateTextNode(referenceShortcode));
+                    // Remove indentation on "reference" <div> elements to
+                    // avoid issues where content on a number of blog posts
+                    // is indented when converting to Markdown (and therefore
+                    // incorrectly formatted as code)
+                    RemoveIndentation(referenceDiv);
+                    RemoveIndentation(citeElement);
+                    RemoveIndentation(referenceLink);
 
+                    // Insert the "reference" shortcode at the location where
+                    // the <cite> element was found
+                    citeElement.ParentNode.InsertBefore(
+                        doc.CreateTextNode(referenceShortcode),
+                        citeElement);
+
+                    // Remove the <cite> and <div class="referenceLink">
+                    // elements (since these have been replaced by the new
+                    // "{{< reference ... >}}" shortcode
                     citeElement.Remove();
                     referenceLink.Remove();
                 }
