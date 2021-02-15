@@ -210,6 +210,34 @@ namespace BlogML2Hugo
             return header.ToString();
         }
 
+        private static void AppendHugoShortcodeParameterValue(
+            StringBuilder sb,
+            string parameterName,
+            string parameterValue,
+            bool omitIfNullOrWhitespace = true,
+            bool appendNewLine = true)
+        {
+            if (omitIfNullOrWhitespace == true
+                && string.IsNullOrWhiteSpace(parameterValue) == true)
+            {
+                return;
+            }
+
+            var encodedParameterValue =
+                NormalizeWhitespace(parameterValue)
+                .Replace("\"", "&quot;")
+                .Replace("&quot;", "\\&quot;")
+                .Replace("_", "%5F")
+                .Trim();
+
+            sb.Append($"    {parameterName}=\"{encodedParameterValue}\"");
+
+            if (appendNewLine == true)
+            {
+                sb.AppendLine();
+            }
+        }
+
         static List<string> GetTags(XmlDocument blogMLDoc, string postId)
         {
 
@@ -277,20 +305,27 @@ namespace BlogML2Hugo
             {
                 if (child.Name == "#text")
                 {
-                    var normalizedText = child.InnerHtml
-                        .Replace(Environment.NewLine, " ")
-                        .Replace("\t", " ");
-
-                    while (normalizedText.IndexOf("  ") != -1)
-                    {
-                        normalizedText = normalizedText.Replace("  ", " ");
-                    }
-
-                    Debug.Assert(normalizedText.IndexOf("  ") == -1);
+                    string normalizedText = NormalizeWhitespace(child.InnerHtml);
 
                     child.InnerHtml = normalizedText;
                 }
             });
+        }
+
+        private static string NormalizeWhitespace(
+            string html)
+        {
+            var normalizedText = html
+                .Replace(Environment.NewLine, " ")
+                .Replace("\t", " ");
+
+            while (normalizedText.IndexOf("  ") != -1)
+            {
+                normalizedText = normalizedText.Replace("  ", " ");
+            }
+
+            Debug.Assert(normalizedText.IndexOf("  ") == -1);
+            return normalizedText;
         }
 
         private static string RemoveTrailingSpacesFromEmptyBlockquoteLines(
@@ -340,6 +375,7 @@ namespace BlogML2Hugo
             MassageTechnologyToolboxBlogCallouts(doc);
             MassageTechnologyToolboxBlogConsoleBlocks(doc);
             MassageTechnologyToolboxBlogLinks(doc);
+            ReplaceTechnologyToolboxBlogImages(doc);
         }
 
         private static void MassageTechnologyToolboxBlogCallouts(HtmlDocument doc)
@@ -604,6 +640,106 @@ namespace BlogML2Hugo
                         }
                     }
                 });
+            }
+        }
+
+        private static void ReplaceTechnologyToolboxBlogImages(HtmlDocument doc)
+        {
+            // Replaces blog post content similar to the following:
+            //
+            //    <div class="image">
+            //        <img height="600" width="537" src="..."
+            //            class="screenshot"
+            //            alt="Disk usage screenshot" />
+            //        <div class="caption">
+            //            Figure 2: Disk usage on Windows Vista after installing SP1, Office 2007, VS 2008,
+            //            and Expression</div>
+            //        <div class="imageLink">
+            //            <a target="_blank" href="...">
+            //                See full-sized image.</a>
+            //        </div>
+            //    </div>
+            //
+            // with:
+            //
+            //    <div class="image">
+            //        <div>{{< figure
+            //            src="..."
+            //            alt="Disk usage screenshot"
+            //            height="600"    width="537"
+            //            title="Figure 2: Disk usage on Windows Vista after installing SP1, Office 2007, VS 2008, and Expression" >}}</div>
+            //        
+            //        <div class="imageLink">
+            //            <a target="_blank" href="...">
+            //                See full-sized image.</a>
+            //        </div>
+            //    </div>
+
+            var elements = doc.DocumentNode.SelectNodes(
+                "//div[@class = 'image']");
+
+            if (elements != null)
+            {
+                foreach (var element in elements)
+                {
+                    var imageDiv = element;
+
+                    string captionText = null;
+
+                    var captionDiv = imageDiv.SelectSingleNode(
+                        "div[@class = 'caption']");
+
+                    if (captionDiv != null)
+                    {
+                        captionText = captionDiv.InnerText;
+                    }
+
+                    imageDiv.Descendants("img").ToList().ForEach(img =>
+                    {
+                        var sb = new StringBuilder();
+                        
+                        var imgSrc = img.GetAttributeValue("src", null);
+                        var imgAlt = img.GetAttributeValue("alt", null);
+                        var imgHeight = img.GetAttributeValue("height", null);
+                        var imgWidth = img.GetAttributeValue("width", null);
+                        var imgTitle = img.GetAttributeValue("title", null);
+
+                        if (string.IsNullOrWhiteSpace(captionText) == false)
+                        {
+                            imgTitle = captionText;
+                        }
+
+                        sb.AppendLine("{{< figure");
+
+                        AppendHugoShortcodeParameterValue(sb, "src", imgSrc);
+                        AppendHugoShortcodeParameterValue(sb, "alt", imgAlt);
+                        AppendHugoShortcodeParameterValue(sb, "height", imgHeight,
+                            appendNewLine: false);
+
+                        AppendHugoShortcodeParameterValue(sb, "width", imgWidth);
+                        AppendHugoShortcodeParameterValue(sb, "title", imgTitle,
+                            appendNewLine: false);
+
+                        sb.Append(" >}}");
+
+                        var figureShortcode = sb.ToString();
+
+                        var shortcodeDiv = img.OwnerDocument.CreateElement("div");
+
+                        shortcodeDiv.AppendChild(
+                            img.OwnerDocument.CreateTextNode(figureShortcode));
+
+                        img.ParentNode.InsertBefore(shortcodeDiv, img);
+
+                        img.Remove();
+
+                        if (captionDiv != null
+                            && captionDiv.ParentNode != null)
+                        {
+                            captionDiv.Remove();
+                        }
+                    });
+                }
             }
         }
     }
