@@ -164,11 +164,11 @@ namespace BlogML2Hugo
             var escapedTitle = post.Title.Replace("\"", "\\\"");
 
             header.AppendLine($"title: \"{escapedTitle}\"");
-            header.AppendLine($"date: {post.DateCreated:yyyy-MM-ddTHH:mm:ss}+08:00");
+            header.AppendLine($"date: {post.DateCreated:yyyy-MM-ddTHH:mm:ss}-07:00");
 
             if (post.DateModified != post.DateCreated)
             {
-                header.AppendLine($"lastmod: {post.DateModified:yyyy-MM-ddTHH:mm:ss}+08:00");
+                header.AppendLine($"lastmod: {post.DateModified:yyyy-MM-ddTHH:mm:ss}-07:00");
             }
 
             if (post.HasExcerpt)
