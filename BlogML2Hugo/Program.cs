@@ -401,12 +401,14 @@ namespace BlogML2Hugo
             // Replaces blog post content similar to the following:
             //
             //   <div class="consoleBlock">
+            //     <kbd>cls</kbd><br/>
             //     <kbd>robocopy ...</kbd></div>
             //
             // with:
             //
             //   <div class="consoleBlock">
-            //     <pre><code>robocopy ...</code></pre></div>
+            //     <pre><code>cls</code>
+            //     <code>robocopy ...</code></pre></div>
 
             var elements = doc.DocumentNode.SelectNodes("//div[@class = 'consoleBlock']/kbd");
 
@@ -418,13 +420,25 @@ namespace BlogML2Hugo
 
                     var parent = element.ParentNode;
 
+                    HtmlNode preElement = null;
+
+                    if (element.ParentNode.LastChild.Name == "pre")
+                    {
+                        preElement = element.ParentNode.LastChild;
+
+                        preElement.ChildNodes.Add(
+                            doc.CreateTextNode(Environment.NewLine));
+                    }
+
+                    if (preElement == null)
+                    {
+                        preElement = doc.CreateElement("pre");
+                        parent.ChildNodes.Add(preElement);
+                    }
+
                     element.Remove();
 
-                    var newElement = doc.CreateElement("pre");
-
-                    newElement.ChildNodes.Add(element);
-
-                    parent.ChildNodes.Add(newElement);
+                    preElement.ChildNodes.Add(element);
                 }
             }
         }
