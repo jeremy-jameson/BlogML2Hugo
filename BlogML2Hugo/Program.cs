@@ -375,6 +375,7 @@ namespace BlogML2Hugo
             MassageTechnologyToolboxBlogCallouts(doc);
             MassageTechnologyToolboxBlogConsoleBlocks(doc);
             MassageTechnologyToolboxBlogLinks(doc);
+            MassageTechnologyToolboxBlogTables(doc);
             ReplaceTechnologyToolboxBlogImages(doc);
             ReplaceTechnologyToolboxBlogReferences(doc);
         }
@@ -515,6 +516,55 @@ namespace BlogML2Hugo
 
                             link.Attributes["href"].Value = href;
                         }
+                    }
+                }
+            }
+        }
+
+        private static void MassageTechnologyToolboxBlogTables(HtmlDocument doc)
+        {
+            // Replaces blog post content similar to the following:
+            //
+            //   <table>
+            //       <caption>My Table</caption>
+            //       ...
+            //   </table>
+            //
+            // with:
+            //
+            //   <p><strong>My Table</strong></p>
+            //   <table>
+            //       ...
+            //   </table>
+            //
+            // This is used to avoid issues where <caption> elements are passed
+            // through when converting from HTML to Markdown
+
+            var elements = doc.DocumentNode.SelectNodes("//table");
+
+            if (elements != null)
+            {
+                foreach (var element in elements)
+                {
+                    var table = element;
+
+                    var captionElement = table.SelectSingleNode(
+                        "descendant::caption");
+
+                    if (captionElement != null)
+                    {
+                        // Change the <caption> element to <p> and move it before
+                        // the <table> element
+
+                        captionElement.Name = "p";
+                        captionElement.Remove();
+
+                        table.ParentNode.InsertBefore(
+                            captionElement,
+                            table);
+
+                        captionElement.InnerHtml = "<strong>" +
+                            captionElement.InnerHtml.Trim() + "</strong>";
                     }
                 }
             }
