@@ -493,6 +493,10 @@ namespace BlogML2Hugo
 
             FixSpacesInsideEmphasisElements(
                 doc,
+                "//em[text() != normalize-space()]");
+
+            FixSpacesInsideEmphasisElements(
+                doc,
                 "//i[text() != normalize-space()]");
 
             FixSpacesInsideEmphasisElements(
@@ -527,6 +531,7 @@ namespace BlogML2Hugo
             {
                 Debug.Assert(
                     node.Name == "b"
+                    || node.Name == "em"
                     || node.Name == "i"
                     || node.Name == "strong");
 
