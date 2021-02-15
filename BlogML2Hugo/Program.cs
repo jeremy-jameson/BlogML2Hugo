@@ -487,24 +487,24 @@ namespace BlogML2Hugo
             //
             //   ...click the <b>Advanced</b> button...
 
-            var nodes = doc.DocumentNode.SelectNodes(
+            FixSpacesInsideEmphasisElements(
+                doc,
                 "//b[text() != normalize-space()]");
 
-            if (nodes != null)
-            {
-                FixSpacesInsideEmphasisElements(nodes);
-            }
-
-            nodes = doc.DocumentNode.SelectNodes(
+            FixSpacesInsideEmphasisElements(
+                doc,
                 "//i[text() != normalize-space()]");
 
-            if (nodes != null)
-            {
-                FixSpacesInsideEmphasisElements(nodes);
-            }
-
-            nodes = doc.DocumentNode.SelectNodes(
+            FixSpacesInsideEmphasisElements(
+                doc,
                 "//strong[text() != normalize-space()]");
+        }
+
+        private static void FixSpacesInsideEmphasisElements(
+            HtmlDocument doc,
+            string xpath)
+        {
+            var nodes = doc.DocumentNode.SelectNodes(xpath);
 
             if (nodes != null)
             {
