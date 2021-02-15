@@ -453,8 +453,6 @@ namespace BlogML2Hugo
             {
                 foreach (var element in elements)
                 {
-                    element.Name = "code";
-
                     var parent = element.ParentNode;
 
                     HtmlNode preElement = null;
@@ -470,11 +468,19 @@ namespace BlogML2Hugo
                     if (preElement == null)
                     {
                         preElement = doc.CreateElement("pre");
+
+                        // Add the <pre> element after the existing content
+                        // (this way, if there are any additional <kbd>
+                        // elements, they will be merged together into a
+                        // single <pre> element -- while preserving the original
+                        // order)
                         parent.ChildNodes.Add(preElement);
                     }
 
+                    // Change the <kbd> element to <code> and move it inside
+                    // the <pre> element
+                    element.Name = "code";
                     element.Remove();
-
                     preElement.ChildNodes.Add(element);
                 }
             }
