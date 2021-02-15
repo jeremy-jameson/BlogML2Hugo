@@ -525,6 +525,11 @@ namespace BlogML2Hugo
 
             foreach (var node in nodes)
             {
+                Debug.Assert(
+                    node.Name == "b"
+                    || node.Name == "i"
+                    || node.Name == "strong");
+
                 node.ChildNodes.ToList().ForEach((child) =>
                 {
                     if (child.Name == "#text")
@@ -533,13 +538,33 @@ namespace BlogML2Hugo
 
                         if (trimmedText != child.InnerText)
                         {
-                            var newTextNode = node.OwnerDocument
-                                .CreateTextNode(" ");
+                            var emphasisNode = child.ParentNode;
+                            HtmlNode whitespaceTextNode = null;
+
+                            if (emphasisNode.NextSibling != null
+                                && emphasisNode.NextSibling.Name == "#text")
+                            {
+                                var textNode = emphasisNode.NextSibling;
+
+                                if (textNode.InnerText.TrimStart()
+                                    != textNode.InnerText)
+                                {
+                                    whitespaceTextNode = textNode;
+                                }
+                            }
 
                             child.InnerHtml = trimmedText;
 
-                            node.ParentNode.InsertAfter(newTextNode, node);
-                        }                            
+                            if (whitespaceTextNode == null)
+                            {
+                                whitespaceTextNode = node.OwnerDocument
+                                    .CreateTextNode(" ");
+
+                                node.ParentNode.InsertAfter(
+                                    whitespaceTextNode,
+                                    node);
+                            }
+                        }
                     }
                 });
             }
