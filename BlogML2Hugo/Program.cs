@@ -376,6 +376,7 @@ namespace BlogML2Hugo
             MassageTechnologyToolboxBlogConsoleBlocks(doc);
             MassageTechnologyToolboxBlogLinks(doc);
             ReplaceTechnologyToolboxBlogImages(doc);
+            ReplaceTechnologyToolboxBlogReferences(doc);
         }
 
         private static void MassageTechnologyToolboxBlogCallouts(HtmlDocument doc)
@@ -739,6 +740,89 @@ namespace BlogML2Hugo
                             captionDiv.Remove();
                         }
                     });
+                }
+            }
+        }
+
+        private static void ReplaceTechnologyToolboxBlogReferences(HtmlDocument doc)
+        {
+            // Replaces blog post content similar to the following:
+            //
+            //   <div class="reference">
+            //     <cite>"Access is denied" error message...</cite> 
+            //     <div class="referenceLink">
+            //       <a href="http://support.microsoft.com/kb/867466">
+            //         http://support.microsoft.com/kb/867466</a>
+            //     </div>
+            //   </div>
+            //
+            // with:
+            //
+            //    <div class="reference">
+            //        <div>{{< reference
+            //            title=""Access is denied" error message..."
+            //            linkHref="http://support.microsoft.com/kb/867466" >}}</div>
+            //    </div>
+            //
+            // This is used to avoid issues where <cite> elements are passed
+            // through when converting from HTML to Markdown
+
+            var elements = doc.DocumentNode.SelectNodes(
+                "//div[@class = 'reference']");
+
+            if (elements != null)
+            {
+                foreach (var element in elements)
+                {
+                    var referenceDiv = element;
+
+                    var citeElement = referenceDiv.SelectSingleNode(
+                        "descendant::cite");
+
+                    if (citeElement == null)
+                    {
+                        // If the "reference" block does not contain a <cite>
+                        // element then there is no issue using the default
+                        // HTML to Markdown conversion process (i.e. skip this
+                        // "reference" block)
+                        continue;
+                    }
+
+                    string title = citeElement.InnerText;
+                    string linkHref = null;
+                    string linkText = null;
+
+                    var referenceLink = referenceDiv.SelectSingleNode(
+                        "descendant::div[@class = 'referenceLink']/a");
+
+                    linkText = referenceLink.InnerText.Trim();
+                    linkHref = referenceLink.GetAttributeValue("href", null);
+
+                    var sb = new StringBuilder();
+
+                    sb.Append("{{< reference");
+
+                    AppendHugoShortcodeParameterValue(sb, "title", title,
+                        appendNewLine: false);
+
+                    AppendHugoShortcodeParameterValue(sb, "linkHref", linkHref,
+                        appendNewLine: false);
+
+                    if (linkText != linkHref)
+                    {
+                        AppendHugoShortcodeParameterValue(
+                            sb, "linkText", linkText, appendNewLine: false);
+                    }
+
+                    sb.Append(" >}}");
+
+                    var referenceShortcode = sb.ToString();
+
+                    referenceDiv.AppendChild(
+                        doc.CreateTextNode(referenceShortcode));
+
+                    citeElement.Remove();
+                    referenceLink.Remove();
                 }
             }
         }
