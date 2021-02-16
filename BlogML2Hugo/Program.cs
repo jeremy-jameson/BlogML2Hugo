@@ -235,7 +235,7 @@ namespace BlogML2Hugo
             }
 
             var encodedParameterValue =
-                NormalizeWhitespace(parameterValue)
+                HtmlDocumentHelper.NormalizeWhitespace(parameterValue)
                 .Replace("\"", "&quot;")
                 .Replace("&quot;", "\\&quot;")
                 .Replace("_", "%5F")
@@ -338,45 +338,6 @@ namespace BlogML2Hugo
             return tags;
         }
 
-        private static void NormalizeWhitespaceInChildTextNodes(HtmlNode node)
-        {
-            // Replaces HTML content similar to the following:
-            //
-            //   <p>Some     <i>cool</i>                  <b>content</b>
-            //     <a href="#">...</a>...
-            //   </p>
-            //
-            // with:
-            //
-            //   <p>Some <i>cool</i> <b>content</b> <a href='#'>...</a>... </p>
-
-            node.ChildNodes.ToList().ForEach((child) =>
-            {
-                if (child.Name == "#text")
-                {
-                    string normalizedText = NormalizeWhitespace(child.InnerHtml);
-
-                    child.InnerHtml = normalizedText;
-                }
-            });
-        }
-
-        private static string NormalizeWhitespace(
-            string html)
-        {
-            var normalizedText = html
-                .Replace(Environment.NewLine, " ")
-                .Replace("\t", " ");
-
-            while (normalizedText.IndexOf("  ") != -1)
-            {
-                normalizedText = normalizedText.Replace("  ", " ");
-            }
-
-            Debug.Assert(normalizedText.IndexOf("  ") == -1);
-            return normalizedText;
-        }
-
         private static string RemoveTrailingSpacesFromEmptyBlockquoteLines(
             string markdown)
         {
@@ -462,7 +423,8 @@ namespace BlogML2Hugo
                 {
                     var blockquote = element;
 
-                    NormalizeWhitespaceInChildTextNodes(blockquote);
+                    HtmlDocumentHelper.NormalizeWhitespaceInChildTextNodes(
+                        blockquote);
 
                     var cssClass = "font-italic";
 
@@ -554,7 +516,8 @@ namespace BlogML2Hugo
                             newElement.AppendChild(childNode);
                         });
 
-                        NormalizeWhitespaceInChildTextNodes(newElement);
+                        HtmlDocumentHelper.NormalizeWhitespaceInChildTextNodes(
+                            newElement);
 
                         noteBody.AppendChild(newElement);
                     }
@@ -618,7 +581,8 @@ namespace BlogML2Hugo
                     // any whitespace within the content (e.g. convert any
                     // line breaks to spaces). This ensures the content still
                     // renders as expected.
-                    NormalizeWhitespaceInChildTextNodes(element);
+                    HtmlDocumentHelper.NormalizeWhitespaceInChildTextNodes(
+                        element);
                 }
             }
         }
@@ -991,7 +955,9 @@ namespace BlogML2Hugo
                     if (__allowedKbdContent.Contains(content) == false)
                     {
                         kbd.Name = "code";
-                        NormalizeWhitespaceInChildTextNodes(kbd);
+                        HtmlDocumentHelper.NormalizeWhitespaceInChildTextNodes(
+                            kbd);
+
                         continue;
                     }
 
