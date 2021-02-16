@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -15,16 +14,6 @@ namespace BlogML2Hugo
 {
     class Program
     {
-        // List of "allowed" content in <kbd> elements (e.g. "Enter", "F5")
-        private static HashSet<string> __allowedKbdContent =
-            GetAllowedKbdContent();
-
-        // List of content discoverd in <kbd> elements (used to generate the
-        // "allowed" list by executing the migration and then inspecting the
-        // list in the debugger before the process ends)
-        private static HashSet<string> __discoveredKbdContent =
-            new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
         static void Main(string[] args)
         {
             if (args.Length < 2)
@@ -906,69 +895,20 @@ namespace BlogML2Hugo
 
                     var content = kbd.InnerText.Trim();
 
-                    __discoveredKbdContent.Add(content);
+                    var shortcodeBuilder = new HugoShortcodeNodeBuilder();
 
-                    if (__allowedKbdContent.Contains(content) == false)
-                    {
-                        kbd.Name = "code";
-                        HtmlDocumentHelper.NormalizeWhitespaceInChildTextNodes(
-                            kbd);
+                    var shortcodeNode = shortcodeBuilder
+                        .ForHtmlDocument(element.OwnerDocument)
+                        .WithHtmlNodeName("span")
+                        .WithName("kbd")
+                        .WithParameter(content)
+                        .Build();
 
-                        continue;
-                    }
+                    element.ParentNode.InsertBefore(shortcodeNode, element);
 
-                    ReplaceInlineElementWithHugoShortcode(
-                        kbd, "kbd", null, content);
+                    element.Remove();
                 }
             }
-        }
-
-        private static void ReplaceInlineElementWithHugoShortcode(
-            HtmlNode element,
-            string shortcodeName,
-            NameValueCollection namedParameters,
-            params string[] positionalParameters)
-        {
-            // Replaces blog post content similar to the following:
-            //
-            //    <kbd>...</kbd>
-            //
-            // with:
-            //
-            //    {{< kbd "..." >}}
-
-            Debug.Assert(element.Name == "kbd");
-
-            var shortcodeBuilder = new HugoShortcodeNodeBuilder();
-
-            shortcodeBuilder
-                .ForHtmlDocument(element.OwnerDocument)
-                .WithHtmlNodeName("span")
-                .WithName(shortcodeName);
-
-            if (namedParameters != null)
-            {
-                namedParameters.AllKeys.ToList().ForEach(parameterName =>
-                {
-                    var parameterValue = namedParameters[parameterName];
-
-                    shortcodeBuilder.WithParameter(
-                        parameterName,
-                        parameterValue);
-                });
-            }
-
-            positionalParameters.ToList().ForEach(parameterValue =>
-            {
-                shortcodeBuilder.WithParameter(
-                    parameterValue);
-            });
-
-            var shortcodeNode = shortcodeBuilder.Build();
-
-            element.ParentNode.InsertBefore(shortcodeNode, element);
-
-            element.Remove();
         }
 
         private static void ReplaceTechnologyToolboxBlogReferences(HtmlDocument doc)
