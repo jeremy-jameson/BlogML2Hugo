@@ -14,6 +14,16 @@ namespace BlogML2Hugo
 {
     class Program
     {
+        // List of "allowed" content in <kbd> elements (e.g. "Enter", "F5")
+        private static HashSet<string> __allowedKbdContent =
+            GetAllowedKbdContent();
+
+        // List of content discoverd in <kbd> elements (used to generate the
+        // "allowed" list by executing the migration and then inspecting the
+        // list in the debugger before the process ends)
+        private static HashSet<string> __discoveredKbdContent =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
         static void Main(string[] args)
         {
             if (args.Length < 2)
@@ -230,12 +240,42 @@ namespace BlogML2Hugo
                 .Replace("_", "%5F")
                 .Trim();
 
-            sb.Append($"    {parameterName}=\"{encodedParameterValue}\"");
+            sb.Append($" {parameterName}=\"{encodedParameterValue}\"");
 
             if (appendNewLine == true)
             {
                 sb.AppendLine();
             }
+        }
+
+        private static HashSet<string> GetAllowedKbdContent()
+        {
+            var list = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            // This is just "throw away" code used for migrating blog content,
+            // so just hard code the list of items 
+            
+            // The list was obtained by inspecting the "discovered" list in the
+            // debugger after completing a test migration:
+            //
+            //   __discoveredKbdContent.OrderBy(x => x).ToList()
+
+            list.Add("ALT+PRINT SCREEN");
+            list.Add("CTRL+");
+            list.Add("CTRL+ALT+DELETE");
+            list.Add("CTRL+C");
+            list.Add("CTRL+F");
+            list.Add("CTRL+S");
+            list.Add("Ctrl+Shift+B");
+            list.Add("CTRL+SHIFT+P");
+            list.Add("CTRL+V");
+            list.Add("Delete");
+            list.Add("Enter");
+            list.Add("F5");
+            list.Add("F7");
+            list.Add("W");
+
+            return list;
         }
 
         static List<string> GetTags(XmlDocument blogMLDoc, string postId)
@@ -374,6 +414,7 @@ namespace BlogML2Hugo
             FixSpacesInsideEmphasisElements(doc);
             MassageTechnologyToolboxBlogCallouts(doc);
             MassageTechnologyToolboxBlogConsoleBlocks(doc);
+            ReplaceTechnologyToolboxBlogKbdElements(doc);
             MassageTechnologyToolboxBlogLinks(doc);
             MassageTechnologyToolboxBlogTables(doc);
             ReplaceTechnologyToolboxBlogImages(doc);
@@ -811,6 +852,73 @@ namespace BlogML2Hugo
                             captionDiv.Remove();
                         }
                     });
+                }
+            }
+        }
+
+        private static void ReplaceTechnologyToolboxBlogKbdElements(
+            HtmlDocument doc)
+        {
+            // Replaces blog post content similar to the following:
+            //
+            //    <kbd>...</kbd>
+            //
+            // with:
+            //
+            //    {{< kbd "..." >}}
+            //
+            // when the inner text is specified in the list of allowed <kbd>
+            // content. If the specified content is not allowed, the <kbd>
+            // element is changed to a <code> element.
+            //
+            // For example:
+            //
+            //    <kbd>dir</kbd>
+            //
+            // is replaced with:
+            //
+            //    <code>dir</code>
+            //
+            // since "dir" is not a valid item on the keyboard.
+
+            var elements = doc.DocumentNode.SelectNodes("//kbd");
+
+            if (elements != null)
+            {
+                foreach (var element in elements)
+                {
+                    var kbd = element;
+
+                    var content = kbd.InnerText.Trim();
+
+                    __discoveredKbdContent.Add(content);
+
+                    if (__allowedKbdContent.Contains(content) == false)
+                    {
+                        kbd.Name = "code";
+                        NormalizeWhitespaceInChildTextNodes(kbd);
+                        continue;
+                    }
+
+                    var sb = new StringBuilder();
+
+                    sb.Append("{{< kbd");
+
+                    AppendHugoShortcodeParameterValue(sb, "key", content,
+                        appendNewLine: false);
+
+                    sb.Append(" >}}");
+
+                    var kbdShortcode = sb.ToString();
+
+                    var shortcodeSpan = doc.CreateElement("span");
+
+                    shortcodeSpan.AppendChild(
+                        kbd.OwnerDocument.CreateTextNode(kbdShortcode));
+
+                    kbd.ParentNode.InsertBefore(shortcodeSpan, kbd);
+
+                    kbd.Remove();
                 }
             }
         }
