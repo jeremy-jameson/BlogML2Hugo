@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -986,27 +987,59 @@ namespace BlogML2Hugo
                         continue;
                     }
 
-                    var sb = new StringBuilder();
+                    var namedParameters = new NameValueCollection();
+                    namedParameters.Add("key", content);
 
-                    sb.Append("{{< kbd");
-
-                    AppendHugoShortcodeParameterValue(sb, "key", content,
-                        appendNewLine: false);
-
-                    sb.Append(" >}}");
-
-                    var kbdShortcode = sb.ToString();
-
-                    var shortcodeSpan = doc.CreateElement("span");
-
-                    shortcodeSpan.AppendChild(
-                        kbd.OwnerDocument.CreateTextNode(kbdShortcode));
-
-                    kbd.ParentNode.InsertBefore(shortcodeSpan, kbd);
-
-                    kbd.Remove();
+                    ReplaceInlineElementWithHugoShortcode(
+                        kbd, "kbd", namedParameters);
                 }
             }
+        }
+
+        private static void ReplaceInlineElementWithHugoShortcode(
+            HtmlNode element,
+            string shortcodeName,
+            NameValueCollection namedParameters)
+        {
+            // Replaces blog post content similar to the following:
+            //
+            //    <kbd>...</kbd>
+            //
+            // with:
+            //
+            //    {{< kbd "..." >}}
+
+            Debug.Assert(element.Name == "kbd");
+
+            var sb = new StringBuilder();
+
+            sb.Append("{{< ");
+            sb.Append(shortcodeName);
+
+            namedParameters.AllKeys.ToList().ForEach(parameterName =>
+            {
+                var parameterValue = namedParameters[parameterName];
+
+                AppendHugoShortcodeParameterValue(
+                    sb,
+                    parameterName,
+                    parameterValue,
+                    appendNewLine: false);
+            });
+
+            sb.Append(" >}}");
+
+            var kbdShortcode = sb.ToString();
+
+            var doc = element.OwnerDocument;
+            var shortcodeSpan = doc.CreateElement("span");
+
+            shortcodeSpan.AppendChild(
+                doc.CreateTextNode(kbdShortcode));
+
+            element.ParentNode.InsertBefore(shortcodeSpan, element);
+
+            element.Remove();
         }
 
         private static void ReplaceTechnologyToolboxBlogReferences(HtmlDocument doc)
