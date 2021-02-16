@@ -241,8 +241,16 @@ namespace BlogML2Hugo
                 .Replace("_", "%5F")
                 .Trim();
 
-            sb.Append($" {parameterName}=\"{encodedParameterValue}\"");
+            if (string.IsNullOrWhiteSpace(parameterName) == false)
+            {
+                sb.Append($" {parameterName}=\"{encodedParameterValue}\"");
 
+            }
+            else
+            {
+                sb.Append($" \"{encodedParameterValue}\"");
+            }
+            
             if (appendNewLine == true)
             {
                 sb.AppendLine();
@@ -987,11 +995,8 @@ namespace BlogML2Hugo
                         continue;
                     }
 
-                    var namedParameters = new NameValueCollection();
-                    namedParameters.Add("key", content);
-
                     ReplaceInlineElementWithHugoShortcode(
-                        kbd, "kbd", namedParameters);
+                        kbd, "kbd", null, content);
                 }
             }
         }
@@ -999,7 +1004,8 @@ namespace BlogML2Hugo
         private static void ReplaceInlineElementWithHugoShortcode(
             HtmlNode element,
             string shortcodeName,
-            NameValueCollection namedParameters)
+            NameValueCollection namedParameters,
+            params string[] positionalParameters)
         {
             // Replaces blog post content similar to the following:
             //
@@ -1016,13 +1022,25 @@ namespace BlogML2Hugo
             sb.Append("{{< ");
             sb.Append(shortcodeName);
 
-            namedParameters.AllKeys.ToList().ForEach(parameterName =>
+            if (namedParameters != null)
             {
-                var parameterValue = namedParameters[parameterName];
+                namedParameters.AllKeys.ToList().ForEach(parameterName =>
+                {
+                    var parameterValue = namedParameters[parameterName];
 
+                    AppendHugoShortcodeParameterValue(
+                        sb,
+                        parameterName,
+                        parameterValue,
+                        appendNewLine: false);
+                });
+            }
+
+            positionalParameters.ToList().ForEach(parameterValue =>
+            {
                 AppendHugoShortcodeParameterValue(
                     sb,
-                    parameterName,
+                    null,
                     parameterValue,
                     appendNewLine: false);
             });
