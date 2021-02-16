@@ -423,6 +423,82 @@ namespace BlogML2Hugo
 
         private static void MassageTechnologyToolboxBlogCallouts(HtmlDocument doc)
         {
+            MassageTechnologyToolboxBlogDirectQuotes(doc);
+            MassageTechnologyToolboxBlogNotes(doc);
+        }
+
+        private static void MassageTechnologyToolboxBlogDirectQuotes(HtmlDocument doc)
+        {
+            // Replaces blog post content similar to the following:
+            //
+            //   <blockquote class="directQuote errorMessage">
+            //     Lorem ipsum dolor sit amet...
+            //   </blockquote>
+            //
+            // with:
+            //
+            //   {{< blockquote "font-italic text-danger" >}}
+            //
+            //     Lorem ipsum dolor sit amet...
+            //
+            //   {{< /blockquote >}}
+            //
+
+            var elements = doc.DocumentNode.SelectNodes(
+                "//blockquote[starts-with(@class, 'directQuote')]");
+
+            if (elements != null)
+            {
+                foreach (var element in elements)
+                {
+                    var blockquote = element;
+
+                    var cssClass = "font-italic";
+
+                    if (blockquote.Attributes["class"].Value
+                        .Contains("errorMessage") == true)
+                    {
+                        cssClass += " text-danger";
+                    }
+
+                    string blockquoteShortcode =
+                        "{{< blockquote \"" + cssClass + "\" >}}";
+
+                    var shortcodeDiv = doc.CreateElement("div");
+
+                    shortcodeDiv.AppendChild(
+                        doc.CreateTextNode(blockquoteShortcode));
+
+                    blockquote.ParentNode.InsertBefore(
+                        shortcodeDiv,
+                        blockquote);
+
+                    blockquote.ParentNode.InsertBefore(
+                        doc.CreateTextNode(Environment.NewLine),
+                        blockquote);
+
+                    shortcodeDiv = doc.CreateElement("div");
+
+                    shortcodeDiv.AppendChild(
+                        doc.CreateTextNode("{{< /blockquote >}}"));
+
+                    blockquote.ParentNode.InsertAfter(
+                        shortcodeDiv,
+                        blockquote);
+
+                    blockquote.ParentNode.InsertAfter(
+                        doc.CreateTextNode(Environment.NewLine),
+                        blockquote);
+
+                    // Change <blockquote> to <div> so the content is converted
+                    // to plain text in the Markdown
+                    blockquote.Name = "div";
+                }
+            }
+        }
+
+        private static void MassageTechnologyToolboxBlogNotes(HtmlDocument doc)
+        {
             // Replaces blog post content similar to the following:
             //
             //   <blockquote class="note important">
