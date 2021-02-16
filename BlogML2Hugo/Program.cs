@@ -453,6 +453,8 @@ namespace BlogML2Hugo
                 {
                     var blockquote = element;
 
+                    NormalizeWhitespaceInChildTextNodes(blockquote);
+
                     var cssClass = "font-italic";
 
                     if (blockquote.Attributes["class"].Value
