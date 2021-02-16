@@ -524,6 +524,14 @@ namespace BlogML2Hugo
                     element.Name = "code";
                     element.Remove();
                     preElement.ChildNodes.Add(element);
+
+                    // Since we changed the element from an inline element
+                    // (<kbd>...</kbd>) to a block element
+                    // (<pre><code>...</code></pre>), we must normalize
+                    // any whitespace within the content (e.g. convert any
+                    // line breaks to spaces). This ensures the content still
+                    // renders as expected.
+                    NormalizeWhitespaceInChildTextNodes(element);
                 }
             }
         }
