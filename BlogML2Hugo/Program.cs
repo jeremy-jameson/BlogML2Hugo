@@ -221,42 +221,6 @@ namespace BlogML2Hugo
             return header.ToString();
         }
 
-        private static void AppendHugoShortcodeParameterValue(
-            StringBuilder sb,
-            string parameterName,
-            string parameterValue,
-            bool omitIfNullOrWhitespace = true,
-            bool appendNewLine = true)
-        {
-            if (omitIfNullOrWhitespace == true
-                && string.IsNullOrWhiteSpace(parameterValue) == true)
-            {
-                return;
-            }
-
-            var encodedParameterValue =
-                HtmlDocumentHelper.NormalizeWhitespace(parameterValue)
-                .Replace("\"", "&quot;")
-                .Replace("&quot;", "\\&quot;")
-                .Replace("_", "%5F")
-                .Trim();
-
-            if (string.IsNullOrWhiteSpace(parameterName) == false)
-            {
-                sb.Append($" {parameterName}=\"{encodedParameterValue}\"");
-
-            }
-            else
-            {
-                sb.Append($" \"{encodedParameterValue}\"");
-            }
-            
-            if (appendNewLine == true)
-            {
-                sb.AppendLine();
-            }
-        }
-
         private static HashSet<string> GetAllowedKbdContent()
         {
             var list = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -868,8 +832,6 @@ namespace BlogML2Hugo
 
                     imageDiv.Descendants("img").ToList().ForEach(img =>
                     {
-                        var sb = new StringBuilder();
-                        
                         var imgSrc = img.GetAttributeValue("src", null);
                         var imgAlt = img.GetAttributeValue("alt", null);
                         var imgHeight = img.GetAttributeValue("height", null);
@@ -881,27 +843,21 @@ namespace BlogML2Hugo
                             imgTitle = captionText;
                         }
 
-                        sb.AppendLine("{{< figure");
+                        var shortcodeBuilder = new HugoShortcodeNodeBuilder();
 
-                        AppendHugoShortcodeParameterValue(sb, "src", imgSrc);
-                        AppendHugoShortcodeParameterValue(sb, "alt", imgAlt);
-                        AppendHugoShortcodeParameterValue(sb, "height", imgHeight,
-                            appendNewLine: false);
+                        var shortcodeNode = shortcodeBuilder
+                            .ForHtmlDocument(img.OwnerDocument)
+                            .WithHtmlNodeName("div")
+                            .WithName("figure")
+                            .WithParameter("src", imgSrc)
+                            .WithParameter("alt", imgAlt)
+                            .WithParameter("height", imgHeight)
+                            .WithParameter("width", imgWidth)
+                            .WithParameter("title", imgTitle)
+                            .WithParametersOnSeparateLines()
+                            .Build();
 
-                        AppendHugoShortcodeParameterValue(sb, "width", imgWidth);
-                        AppendHugoShortcodeParameterValue(sb, "title", imgTitle,
-                            appendNewLine: false);
-
-                        sb.Append(" >}}");
-
-                        var figureShortcode = sb.ToString();
-
-                        var shortcodeDiv = img.OwnerDocument.CreateElement("div");
-
-                        shortcodeDiv.AppendChild(
-                            img.OwnerDocument.CreateTextNode(figureShortcode));
-
-                        img.ParentNode.InsertBefore(shortcodeDiv, img);
+                        img.ParentNode.InsertBefore(shortcodeNode, img);
 
                         img.Remove();
 
@@ -983,10 +939,12 @@ namespace BlogML2Hugo
 
             Debug.Assert(element.Name == "kbd");
 
-            var sb = new StringBuilder();
+            var shortcodeBuilder = new HugoShortcodeNodeBuilder();
 
-            sb.Append("{{< ");
-            sb.Append(shortcodeName);
+            shortcodeBuilder
+                .ForHtmlDocument(element.OwnerDocument)
+                .WithHtmlNodeName("span")
+                .WithName(shortcodeName);
 
             if (namedParameters != null)
             {
@@ -994,34 +952,21 @@ namespace BlogML2Hugo
                 {
                     var parameterValue = namedParameters[parameterName];
 
-                    AppendHugoShortcodeParameterValue(
-                        sb,
+                    shortcodeBuilder.WithParameter(
                         parameterName,
-                        parameterValue,
-                        appendNewLine: false);
+                        parameterValue);
                 });
             }
 
             positionalParameters.ToList().ForEach(parameterValue =>
             {
-                AppendHugoShortcodeParameterValue(
-                    sb,
-                    null,
-                    parameterValue,
-                    appendNewLine: false);
+                shortcodeBuilder.WithParameter(
+                    parameterValue);
             });
 
-            sb.Append(" >}}");
+            var shortcodeNode = shortcodeBuilder.Build();
 
-            var kbdShortcode = sb.ToString();
-
-            var doc = element.OwnerDocument;
-            var shortcodeSpan = doc.CreateElement("span");
-
-            shortcodeSpan.AppendChild(
-                doc.CreateTextNode(kbdShortcode));
-
-            element.ParentNode.InsertBefore(shortcodeSpan, element);
+            element.ParentNode.InsertBefore(shortcodeNode, element);
 
             element.Remove();
         }
@@ -1080,25 +1025,22 @@ namespace BlogML2Hugo
                     linkText = referenceLink.InnerText.Trim();
                     linkHref = referenceLink.GetAttributeValue("href", null);
 
-                    var sb = new StringBuilder();
+                    var shortcodeBuilder = new HugoShortcodeNodeBuilder();
 
-                    sb.Append("{{< reference");
-
-                    AppendHugoShortcodeParameterValue(sb, "title", title,
-                        appendNewLine: false);
-
-                    AppendHugoShortcodeParameterValue(sb, "linkHref", linkHref,
-                        appendNewLine: false);
+                    shortcodeBuilder
+                        .ForHtmlDocument(doc)
+                        .WithName("reference")
+                        .WithParameter("title", title)
+                        .WithParameter("linkHref", linkHref);
 
                     if (linkText != linkHref)
                     {
-                        AppendHugoShortcodeParameterValue(
-                            sb, "linkText", linkText, appendNewLine: false);
+                        shortcodeBuilder
+                            .WithParameter("linkText", linkText);
                     }
 
-                    sb.Append(" >}}");
-
-                    var referenceShortcode = sb.ToString();
+                    var shortcodeNode = shortcodeBuilder
+                        .Build();
 
                     // Remove indentation on "reference" <div> elements to
                     // avoid issues where content on a number of blog posts
@@ -1111,7 +1053,7 @@ namespace BlogML2Hugo
                     // Insert the "reference" shortcode at the location where
                     // the <cite> element was found
                     citeElement.ParentNode.InsertBefore(
-                        doc.CreateTextNode(referenceShortcode),
+                        shortcodeNode,
                         citeElement);
 
                     // Remove the <cite> and <div class="referenceLink">
