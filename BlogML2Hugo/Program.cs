@@ -874,20 +874,6 @@ namespace BlogML2Hugo
             // with:
             //
             //    {{< kbd "..." >}}
-            //
-            // when the inner text is specified in the list of allowed <kbd>
-            // content. If the specified content is not allowed, the <kbd>
-            // element is changed to a <code> element.
-            //
-            // For example:
-            //
-            //    <kbd>dir</kbd>
-            //
-            // is replaced with:
-            //
-            //    <code>dir</code>
-            //
-            // since "dir" is not a valid item on the keyboard.
 
             var elements = doc.DocumentNode.SelectNodes("//kbd");
 
