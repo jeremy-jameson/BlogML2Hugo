@@ -184,6 +184,10 @@ namespace BlogML2Hugo
                 header.AppendLine($"excerpt: \"{escapedExcerpt}\"");
             }
 
+            var aliasUrl = new Uri(post.PostUrl);
+
+            header.AppendLine($"aliases: [\"{aliasUrl.PathAndQuery}\"]");
+
             // TODO: Remove "draft" from front matter for final conversion
             header.AppendLine($"draft: true");
 
