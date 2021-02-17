@@ -340,6 +340,9 @@ namespace BlogML2Hugo
         {
             FixSpacesInsideEmphasisElements(doc);
             MassageTechnologyToolboxBlogCallouts(doc);
+
+            MassageTechnologyToolboxBlogKbdContentInsideConsoleBlocks(doc);
+
             MassageTechnologyToolboxBlogConsoleBlocks(doc);
             ReplaceTechnologyToolboxBlogKbdElements(doc);
             MassageTechnologyToolboxBlogLinks(doc);
@@ -484,6 +487,78 @@ namespace BlogML2Hugo
         }
 
         private static void MassageTechnologyToolboxBlogConsoleBlocks(HtmlDocument doc)
+        {
+            // Replaces blog post content similar to the following:
+            //
+            //   <div class="consoleBlock">
+            //     ...
+            //   </div>
+            //
+            // with:
+            //
+            //   {{< console-block-start >}}
+            //
+            //   <div class="consoleBlock">
+            //     ...
+            //   </div>
+            //
+            //   {{< console-block-end >}}
+
+            var elements = doc.DocumentNode.SelectNodes("//div[@class = 'consoleBlock']");
+
+            if (elements != null)
+            {
+                foreach (var element in elements)
+                {
+                    bool hasParagraphContent = element.Descendants("p").Any();
+                    bool hasPreformattedContent = element.Descendants("pre").Any();
+
+                    if (hasParagraphContent == false
+                        && hasPreformattedContent == true)
+                    {
+                        continue;
+                    }
+
+                    // Insert paragraph containing Hugo shortcode
+                    // "{{< console-block-start >}}" before the
+                    // <div class="consoleBlock"> element
+
+                    var shortcodeBuilder = new HugoShortcodeNodeBuilder();
+
+                    var shortcodeNode = shortcodeBuilder
+                        .ForHtmlDocument(element.OwnerDocument)
+                        .WithHtmlNodeName("div")
+                        .WithName("console-block-start")
+                        .Build();
+
+                    var paragraph = element.OwnerDocument.CreateElement("p");
+
+                    paragraph.ChildNodes.Add(shortcodeNode);
+
+                    element.ParentNode.InsertBefore(paragraph, element);
+
+                    // Insert paragraph containing Hugo shortcode
+                    // "{{< console-block-end >}}" after the
+                    // <div class="consoleBlock"> element
+
+                    shortcodeBuilder = new HugoShortcodeNodeBuilder();
+
+                    shortcodeNode = shortcodeBuilder
+                        .ForHtmlDocument(element.OwnerDocument)
+                        .WithHtmlNodeName("div")
+                        .WithName("console-block-end")
+                        .Build();
+
+                    paragraph = element.OwnerDocument.CreateElement("p");
+
+                    paragraph.ChildNodes.Add(shortcodeNode);
+
+                    element.ParentNode.InsertAfter(paragraph, element);
+                }
+            }
+        }
+
+        private static void MassageTechnologyToolboxBlogKbdContentInsideConsoleBlocks(HtmlDocument doc)
         {
             // Replaces blog post content similar to the following:
             //
@@ -997,13 +1072,30 @@ namespace BlogML2Hugo
         private static void ReplaceTechnologyToolboxBlogSampElements(
             HtmlDocument doc)
         {
-            // Replaces blog post content similar to the following:
+            // Replace simple inline content like the following:
             //
             //    <samp>...</samp>
             //
             // with:
             //
             //    {{< sample-output "..." >}}
+            //
+            // For multi-line <samp> content similar to the following:
+            //
+            //   <samp>Line 1<br>
+            //   <br>
+            //   Line 3</samp>
+            //
+            // wrap the content with a custom Hugo shortcode, change the <samp>
+            // element to <p>, and convert line breaks from HTML to Markdown:
+            //
+            //   {{< sample-block }}
+            //
+            //   <p>Line 1\<br>
+            //   \<br>
+            //   Line 3</p>
+            //
+            //   {{< /sample-block }}
 
             var elements = doc.DocumentNode.SelectNodes("//samp");
 
@@ -1039,6 +1131,9 @@ namespace BlogML2Hugo
                     else if (content.Contains("\n") == false
                         && content.Contains("<br>") == false)
                     {
+                        // Replace <samp>...</samp> with
+                        // {{< sample-output "..." >}}
+
                         var shortcodeBuilder = new HugoShortcodeNodeBuilder();
 
                         var shortcodeNode = shortcodeBuilder
@@ -1051,6 +1146,73 @@ namespace BlogML2Hugo
                         element.ParentNode.InsertBefore(shortcodeNode, element);
 
                         element.Remove();
+                    }
+                    else if (element.Ancestors("pre").FirstOrDefault() != null)
+                    {
+                        // Skip <samp> elements inside <pre> elements, since they
+                        // are converted to fenced-code blocks in Markdown
+                        // (i.e. the <samp> tags are considered obsolete as a
+                        // result of the conversion to Markdown)
+                        continue;
+                    } 
+                    else
+                    {
+                        // Ignore <samp> elements inside <div class="logExcerpt">
+                        // elements
+                        var divNode = element.Ancestors("div").FirstOrDefault();
+
+                        if (divNode != null)
+                        {
+                            var divClass = divNode.GetAttributeValue(
+                                "class", null);
+
+                            if (divClass == "logExcerpt")
+                            {
+                                continue;
+                            }
+                        }
+
+                        // Insert paragraph containing Hugo shortcode
+                        // "{{< sample-block >}}" before the <samp> element
+
+                        var shortcodeBuilder = new HugoShortcodeNodeBuilder();
+
+                        var shortcodeNode = shortcodeBuilder
+                            .ForHtmlDocument(element.OwnerDocument)
+                            .WithHtmlNodeName("div")
+                            .WithName("sample-block")
+                            .Build();
+
+                        var paragraph = element.OwnerDocument.CreateElement("p");
+
+                        paragraph.ChildNodes.Add(shortcodeNode);
+
+                        element.ParentNode.InsertBefore(paragraph, element);
+
+                        // Insert paragraph containing Hugo shortcode
+                        // "{{< /sample-block >}}" after the <samp> element
+
+                        shortcodeBuilder = new HugoShortcodeNodeBuilder();
+
+                        shortcodeNode = shortcodeBuilder
+                            .ForHtmlDocument(element.OwnerDocument)
+                            .WithHtmlNodeName("div")
+                            .WithName("/sample-block")
+                            .Build();
+
+                        paragraph = element.OwnerDocument.CreateElement("p");
+
+                        paragraph.ChildNodes.Add(shortcodeNode);
+
+                        element.ParentNode.InsertAfter(paragraph, element);
+
+                        // Change the <samp> element to <p>
+                        Debug.Assert(element.Name == "samp");
+                        element.Name = "p";
+
+                        // Convert line breaks from HTML to Markdown
+                        element.InnerHtml = element.InnerHtml.Replace(
+                            "<br>", "\\<br>");
                     }
                 }
             }
