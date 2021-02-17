@@ -84,6 +84,9 @@ namespace BlogML2Hugo
 
             var mdConverter = new Converter(config);
 
+            var convertedPostCount = 0;
+            var subfolderMismatchCount = 0;
+
             blog.Posts.ForEach(post =>
             {
                 var slug = post.PostUrl.Substring(post.PostUrl.LastIndexOf('/') + 1);
@@ -135,7 +138,27 @@ namespace BlogML2Hugo
                 }
 
                 WriteConvertedMarkdown(postDir, slug, header, markdown);
+
+                convertedPostCount++;
+
+                var originalUrl = new Uri(post.PostUrl);
+
+                var relativePath = originalUrl.PathAndQuery
+                    .Replace("/blog/jjameson/archive/", "");
+
+                var subfolderFromOriginalUrl = Path.GetDirectoryName(relativePath);
+
+                if (subfolder != subfolderFromOriginalUrl)
+                {
+                    subfolderMismatchCount++;
+
+                    Console.Write("Warning:");
+                    Console.Write($" Subfolder mismatch [{subfolderMismatchCount}]");
+                    Console.WriteLine($" - {subfolder} <-> {subfolderFromOriginalUrl}");
+                }
             });
+
+            Console.WriteLine($"Posts converted: {convertedPostCount}");
         }
 
         static void WriteConvertedMarkdown(string outDir, string slug, string header, string markdown)
