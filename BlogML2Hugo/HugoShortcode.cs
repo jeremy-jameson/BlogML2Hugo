@@ -52,8 +52,11 @@ namespace BlogML2Hugo
                 HtmlDocumentHelper.NormalizeWhitespace(parameterValue)
                 .Replace("\"", "&quot;")
                 .Replace("&quot;", "\\&quot;")
-                .Replace("_", "%5F")
                 .Trim();
+
+            encodedParameterValue =
+                ReverseMarkdownHelper.EncodeBeforeConversion(
+                    encodedParameterValue);
 
             if (string.IsNullOrWhiteSpace(parameterName) == false)
             {

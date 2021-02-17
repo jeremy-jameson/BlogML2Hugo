@@ -115,7 +115,11 @@ namespace BlogML2Hugo
 
                 markdown = Markdown.Normalize(markdown);
 
-                markdown = RemoveTrailingSpacesFromEmptyBlockquoteLines(markdown);
+                markdown = RemoveTrailingSpacesFromEmptyBlockquoteLines(
+                    markdown);
+
+                markdown = ReverseMarkdownHelper.DecodeAfterConversion(
+                    markdown);
 
                 Console.WriteLine($"Writing {slug} ({post.Title})");
 
