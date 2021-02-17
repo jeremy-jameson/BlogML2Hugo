@@ -1091,8 +1091,8 @@ namespace BlogML2Hugo
             //
             //   {{< sample-block }}
             //
-            //   <p>Line 1\<br>
-            //   \<br>
+            //   <p>Line 1\
+            //   \
             //   Line 3</p>
             //
             //   {{< /sample-block }}
@@ -1212,7 +1212,7 @@ namespace BlogML2Hugo
 
                         // Convert line breaks from HTML to Markdown
                         element.InnerHtml = element.InnerHtml.Replace(
-                            "<br>", "\\<br>");
+                            "<br>", "\\");
                     }
                 }
             }
