@@ -881,9 +881,7 @@ namespace BlogML2Hugo
             {
                 foreach (var element in elements)
                 {
-                    var kbd = element;
-
-                    var content = kbd.InnerText.Trim();
+                    var content = element.InnerText.Trim();
 
                     var shortcodeBuilder = new HugoShortcodeNodeBuilder();
 
