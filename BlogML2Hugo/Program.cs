@@ -127,7 +127,7 @@ namespace BlogML2Hugo
                 Console.WriteLine($"Writing {slug} ({post.Title})");
 
                 // Organize blog posts by year/month/day
-                var subfolder = $"{post.DateCreated:yyyy-MM-dd}"
+                var subfolder = $"{post.DateCreated.ToUniversalTime():yyyy-MM-dd}"
                     .Replace("-", "\\");
 
                 var postDir = Path.Combine(outDir, subfolder);
