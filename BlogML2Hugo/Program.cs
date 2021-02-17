@@ -346,6 +346,7 @@ namespace BlogML2Hugo
             MassageTechnologyToolboxBlogTables(doc);
             ReplaceTechnologyToolboxBlogImages(doc);
             ReplaceTechnologyToolboxBlogReferences(doc);
+            ReplaceTechnologyToolboxBlogSampElements(doc);
         }
 
         private static void MassageTechnologyToolboxBlogCallouts(HtmlDocument doc)
@@ -989,6 +990,68 @@ namespace BlogML2Hugo
                     // "{{< reference ... >}}" shortcode
                     citeElement.Remove();
                     referenceLink.Remove();
+                }
+            }
+        }
+
+        private static void ReplaceTechnologyToolboxBlogSampElements(
+            HtmlDocument doc)
+        {
+            // Replaces blog post content similar to the following:
+            //
+            //    <samp>...</samp>
+            //
+            // with:
+            //
+            //    {{< sample-output "..." >}}
+
+            var elements = doc.DocumentNode.SelectNodes("//samp");
+
+            if (elements != null)
+            {
+                foreach (var element in elements)
+                {
+                    var content = element.InnerHtml;
+
+                    // Fix minor inconsistencies in blog posts where <kbd>
+                    // elements should have been used instead of <samp> elements
+                    if (content == "iisapp.vbs"
+                        || content == "stsadm.exe -o activatefeature"
+                        || content == "stsadm.exe -o deleteweb"
+                        || content == "stsadm.exe -o extendvs"
+                        || content == "stsadm.exe -o upgradesolution"
+                        || content == "tf.exe checkin"
+                        || content == "/bypass")
+                    {
+                        var shortcodeBuilder = new HugoShortcodeNodeBuilder();
+
+                        var shortcodeNode = shortcodeBuilder
+                            .ForHtmlDocument(element.OwnerDocument)
+                            .WithHtmlNodeName("span")
+                            .WithName("kbd")
+                            .WithParameter(content)
+                            .Build();
+
+                        element.ParentNode.InsertBefore(shortcodeNode, element);
+
+                        element.Remove();
+                    }
+                    else if (content.Contains("\n") == false
+                        && content.Contains("<br>") == false)
+                    {
+                        var shortcodeBuilder = new HugoShortcodeNodeBuilder();
+
+                        var shortcodeNode = shortcodeBuilder
+                            .ForHtmlDocument(element.OwnerDocument)
+                            .WithHtmlNodeName("span")
+                            .WithName("sample-output")
+                            .WithParameter(content)
+                            .Build();
+
+                        element.ParentNode.InsertBefore(shortcodeNode, element);
+
+                        element.Remove();
+                    }
                 }
             }
         }
