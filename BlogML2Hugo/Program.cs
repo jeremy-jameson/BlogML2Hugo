@@ -127,9 +127,18 @@ namespace BlogML2Hugo
 
                 Console.WriteLine($"Writing {slug} ({post.Title})");
 
-                // Organize blog posts by year/month/day
-                var subfolder = $"{post.DateCreated:yyyy-MM-dd}"
-                    .Replace("-", "\\");
+                // Use LinkMapper.GetPermalink to organize blog posts by the
+                // "authoritative" year/month/day URL (which is determined
+                // by initialize the LinkMapper from <a> elements in blog posts)
+
+                var originalUrl = new Uri(post.PostUrl);
+
+                var permalink = linkMapper.GetPermalink(originalUrl);
+
+                var relativePath = permalink.PathAndQuery
+                    .Replace("/blog/jjameson/", "");
+
+                var subfolder = Path.GetDirectoryName(relativePath);
 
                 var postDir = Path.Combine(outDir, subfolder);
 
