@@ -45,6 +45,15 @@ namespace BlogML2Hugo
             }
         }
 
+        public Uri FindPermalinkBySlug(string slug)
+        {
+            Uri url = null;
+
+            _permalinkMap.TryGetValue(slug, out url);
+
+            return url;
+        }
+
         public Uri GetPermalink(Uri url)
         {
             var slug = _blogUrlConverter.GetSlug(url);

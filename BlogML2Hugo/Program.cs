@@ -114,7 +114,6 @@ namespace BlogML2Hugo
 
                 postHtml = htmlDoc.DocumentNode.OuterHtml;
 
-                var header = ComposeBlogHeader(post, categories, tags, linkMapper);
                 var markdown = mdConverter.Convert(postHtml);
 
                 markdown = Markdown.Normalize(markdown);
@@ -131,21 +130,59 @@ namespace BlogML2Hugo
                 // "authoritative" year/month/day URL (which is determined
                 // by initialize the LinkMapper from <a> elements in blog posts)
 
-                var originalUrl = new Uri(post.PostUrl);
+                var permalink = linkMapper.FindPermalinkBySlug(slug);
 
-                var permalink = linkMapper.GetPermalink(originalUrl);
+                string subfolder = null;
 
-                var relativePath = permalink.PathAndQuery
-                    .Replace("/blog/jjameson/", "");
+                if (permalink == null)
+                {
+                    // The blog post is not referenced by any other blog posts
+                    //
+                    // In this case, we might need to overwrite the value from
+                    // the "post-url" attribute in the BlogML file
+                    //
+                    // For example:
+                    //
+                    //   "https://www.technologytoolbox.com/blog/jjameson/archive/2007/04/23/team-based-development-in-microsoft-office-sharepoint-server-2007.aspx"
+                    //
+                    // should be:
+                    //
+                    //   "https://www.technologytoolbox.com/blog/jjameson/archive/2007/04/24/team-based-development-in-microsoft-office-sharepoint-server-2007.aspx"
 
-                var subfolder = Path.GetDirectoryName(relativePath);
+                    subfolder = $"{post.DateCreated:yyyy-MM-dd}"
+                        .Replace("-", "\\");
 
+                    Uri url = new Uri(
+                        string.Concat(
+                            "https://www.technologytoolbox.com/blog/jjameson/archive/",
+                            subfolder.Replace("\\", "/"),
+                            "/",
+                            slug,
+                            ".aspx"));
+
+                    if (post.PostUrl != url.AbsoluteUri)
+                    {
+                        post.PostUrl = url.AbsoluteUri;
+                    }
+
+                    linkMapper.Add(url);
+                }
+                else
+                {
+                    var relativePath = permalink.PathAndQuery
+                        .Replace("/blog/jjameson/", "");
+
+                    subfolder = Path.GetDirectoryName(relativePath);
+                }
+                
                 var postDir = Path.Combine(outDir, subfolder);
 
                 if (!Directory.Exists(postDir))
                 {
                     Directory.CreateDirectory(postDir);
                 }
+
+                var header = ComposeBlogHeader(post, categories, tags, linkMapper);
 
                 WriteConvertedMarkdown(postDir, slug, header, markdown);
 
