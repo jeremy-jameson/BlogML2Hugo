@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace BlogML2Hugo
 {
@@ -25,7 +26,23 @@ namespace BlogML2Hugo
 
             var slug = _blogUrlConverter.GetSlug(url);
 
-             _permalinkMap.Add(slug, permalink);
+            Uri mappedPermalink = null;
+
+            if (_permalinkMap.TryGetValue(slug, out mappedPermalink) == true)
+            {
+                if (permalink.AbsoluteUri != mappedPermalink.AbsoluteUri)
+                {
+                    throw new ArgumentException(
+                        $"Cannot add URL ({url} --> {permalink})"
+                        + " because the slug ({slug})"
+                        + " is already mapped to a different permalink"
+                        + $" ({mappedPermalink}).");
+                }
+            }
+            else
+            {
+                _permalinkMap.Add(slug, permalink);
+            }
         }
 
         public Uri GetPermalink(Uri url)
