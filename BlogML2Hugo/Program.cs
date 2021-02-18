@@ -86,8 +86,13 @@ namespace BlogML2Hugo
 
             var convertedPostCount = 0;
 
+            var blogUrlConverter = new TechnologyToolboxBlogUrlConverter();
+            var linkMapper = new LinkMapper(blogUrlConverter);
+
             blog.Posts.ForEach(post =>
             {
+                linkMapper.Add(new Uri(post.PostUrl));
+
                 var slug = post.PostUrl.Substring(post.PostUrl.LastIndexOf('/') + 1);
 
                 if (slug.EndsWith(".aspx"))
@@ -102,7 +107,7 @@ namespace BlogML2Hugo
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(postHtml);
 
-                MassageTechnologyToolboxBlogPost(htmlDoc);
+                MassageTechnologyToolboxBlogPost(htmlDoc, linkMapper);
 
                 if (tags.Count == 0)
                 {
@@ -365,7 +370,9 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void MassageTechnologyToolboxBlogPost(HtmlDocument doc)
+        private static void MassageTechnologyToolboxBlogPost(
+            HtmlDocument doc,
+            LinkMapper linkMapper)
         {
             FixSpacesInsideEmphasisElements(doc);
             MassageTechnologyToolboxBlogCallouts(doc);
@@ -374,7 +381,7 @@ namespace BlogML2Hugo
 
             MassageTechnologyToolboxBlogConsoleBlocks(doc);
             ReplaceTechnologyToolboxBlogKbdElements(doc);
-            MassageTechnologyToolboxBlogLinks(doc);
+            MassageTechnologyToolboxBlogLinks(doc, linkMapper);
             MassageTechnologyToolboxBlogTables(doc);
             ReplaceTechnologyToolboxBlogImages(doc);
             ReplaceTechnologyToolboxBlogReferences(doc);
@@ -649,7 +656,9 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void MassageTechnologyToolboxBlogLinks(HtmlDocument doc)
+        private static void MassageTechnologyToolboxBlogLinks(
+            HtmlDocument doc,
+            LinkMapper linkMapper)
         {
             var links = doc.DocumentNode.SelectNodes("//a");
 
@@ -660,23 +669,14 @@ namespace BlogML2Hugo
                     if (link.Attributes.Contains("href"))
                     {
                         var href = link.Attributes["href"].Value;
-                        
-                        if (href.StartsWith(
-                            "/blog/jjameson/archive/",
-                            StringComparison.OrdinalIgnoreCase) == true)
+
+                        var url = new Uri(href, UriKind.RelativeOrAbsolute);
+
+                        if (linkMapper.IsBlogUrl(url) == true)
                         {
-                            href = href.Replace(
-                                "/blog/jjameson/archive/",
-                                "/blog/jjameson/");
+                            var permalink = linkMapper.GetPermalink(url);
 
-                            if (href.EndsWith(
-                                ".aspx",
-                                StringComparison.OrdinalIgnoreCase) == true)
-                            {
-                                href = href.Remove(href.Length - ".aspx".Length);
-                            }
-
-                            link.Attributes["href"].Value = href;
+                            link.Attributes["href"].Value = permalink.PathAndQuery;
                         }
                     }
                 }
