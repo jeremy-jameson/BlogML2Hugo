@@ -114,7 +114,7 @@ namespace BlogML2Hugo
 
                 postHtml = htmlDoc.DocumentNode.OuterHtml;
 
-                var header = ComposeBlogHeader(post, categories, tags);
+                var header = ComposeBlogHeader(post, categories, tags, linkMapper);
                 var markdown = mdConverter.Convert(postHtml);
 
                 markdown = Markdown.Normalize(markdown);
@@ -168,7 +168,11 @@ namespace BlogML2Hugo
             }
         }
 
-        static string ComposeBlogHeader(BlogMLPost post, Dictionary<string, CategoryRef> categories, IEnumerable<string> tags)
+        static string ComposeBlogHeader(
+            BlogMLPost post,
+            Dictionary<string, CategoryRef> categories,
+            IEnumerable<string> tags,
+            LinkMapper linkMapper)
         {
             var header = new StringBuilder("---");
             header.AppendLine();
@@ -192,28 +196,40 @@ namespace BlogML2Hugo
                 header.AppendLine($"excerpt: \"{escapedExcerpt}\"");
             }
 
-            // HACK: Generate alias using post created date
+            // Generate alias using LinkMapper.GetPermalink to ensure the alias
+            // contains the URL specified in <a> elements in blog posts -- as
+            // opposed to, say, the "post-url" attribute in the BlogML file
+            // (which, for Subtext, isn't always the same)
             //
-            // - There appears to be a bug with the Subtext export to BlogML
+            // For example, the following URL is specified in the BlogML file:
             //
-            // - The year/month/day specified in the "post-url" attribute often
-            //   does not match the year/month/day specified in date-created
+            //   https://www.technologytoolbox.com/blog/jjameson/archive/2007/03/02/who-is-this-guy.aspx
             //
-            // - Also note that the URL specified in the "post-url" attribute
-            //   does not match the URLs generated for the "list" pages in Subtext
+            // However, the "authoritative" URL for that blog post is:
+            //
+            //   https://www.technologytoolbox.com/blog/jjameson/archive/2007/03/03/who-is-this-guy.aspx
+            //
+            // Note the day in the URL is different ("02" --> "03")
 
             var originalUrl = new Uri(post.PostUrl);
 
-            var originalFileName = Path.GetFileName(
-                originalUrl.PathAndQuery);
+            var permalink = linkMapper.GetPermalink(originalUrl);
 
-            var alias = Path.Combine(
-                @"\blog\jjameson\archive\",
-                $"{post.DateCreated:yyyy-MM-dd}".Replace("-", "\\"),
-                originalFileName)
-                .Replace('\\', '/');
+            // Convert permalink back to Subtext format
+            //
+            // For example, the alias for:
+            //
+            //   "/blog/jjameson/2007/03/03/who-is-this-guy"
+            //
+            // should be:
+            //
+            //   "/blog/jjameson/archive/2007/03/03/who-is-this-guy.aspx"
 
-            header.AppendLine($"aliases: [\"{alias}\"]");
+            var previousUrl = permalink.PathAndQuery.Replace(
+                "/blog/jjameson/",
+                "/blog/jjameson/archive/") + ".aspx";
+
+            header.AppendLine($"aliases: [\"{previousUrl}\"]");
 
             // TODO: Remove "draft" from front matter for final conversion
             header.AppendLine($"draft: true");
