@@ -86,19 +86,16 @@ namespace BlogML2Hugo
 
             var convertedPostCount = 0;
 
-            var blogUrlConverter = new TechnologyToolboxBlogUrlConverter();
+            IBlogUrlConverter blogUrlConverter =
+                new TechnologyToolboxBlogUrlConverter();
+
             var linkMapper = new LinkMapper(blogUrlConverter);
 
             InitializeLinkMapperFromBlogPosts(linkMapper, blog.Posts);
 
             blog.Posts.ForEach(post =>
             {
-                var slug = post.PostUrl.Substring(post.PostUrl.LastIndexOf('/') + 1);
-
-                if (slug.EndsWith(".aspx"))
-                {
-                    slug = slug.Remove(slug.Length - ".aspx".Length);
-                }
+                var slug = blogUrlConverter.GetSlug(new Uri(post.PostUrl));
 
                 var tags = GetTags(blogDoc, post.ID);
 
