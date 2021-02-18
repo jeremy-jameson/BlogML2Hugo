@@ -85,7 +85,6 @@ namespace BlogML2Hugo
             var mdConverter = new Converter(config);
 
             var convertedPostCount = 0;
-            var subfolderMismatchCount = 0;
 
             blog.Posts.ForEach(post =>
             {
@@ -127,7 +126,7 @@ namespace BlogML2Hugo
                 Console.WriteLine($"Writing {slug} ({post.Title})");
 
                 // Organize blog posts by year/month/day
-                var subfolder = $"{post.DateCreated.AddHours(-7):yyyy-MM-dd}"
+                var subfolder = $"{post.DateCreated:yyyy-MM-dd}"
                     .Replace("-", "\\");
 
                 var postDir = Path.Combine(outDir, subfolder);
@@ -140,26 +139,9 @@ namespace BlogML2Hugo
                 WriteConvertedMarkdown(postDir, slug, header, markdown);
 
                 convertedPostCount++;
-
-                var originalUrl = new Uri(post.PostUrl);
-
-                var relativePath = originalUrl.PathAndQuery
-                    .Replace("/blog/jjameson/archive/", "");
-
-                var subfolderFromOriginalUrl = Path.GetDirectoryName(relativePath);
-
-                if (subfolder != subfolderFromOriginalUrl)
-                {
-                    subfolderMismatchCount++;
-
-                    Console.Write("Warning:");
-                    Console.Write($" Subfolder mismatch [{subfolderMismatchCount}]");
-                    Console.WriteLine($" - {subfolder} <-> {subfolderFromOriginalUrl}");
-                }
             });
 
             Console.WriteLine($"Posts converted: {convertedPostCount}");
-            Console.WriteLine($"Subfolder mismatches: {subfolderMismatchCount}");
         }
 
         static void WriteConvertedMarkdown(string outDir, string slug, string header, string markdown)
@@ -208,9 +190,28 @@ namespace BlogML2Hugo
                 header.AppendLine($"excerpt: \"{escapedExcerpt}\"");
             }
 
-            var aliasUrl = new Uri(post.PostUrl);
+            // HACK: Generate alias using post created date
+            //
+            // - There appears to be a bug with the Subtext export to BlogML
+            //
+            // - The year/month/day specified in the "post-url" attribute often
+            //   does not match the year/month/day specified in date-created
+            //
+            // - Also note that the URL specified in the "post-url" attribute
+            //   does not match the URLs generated for the "list" pages in Subtext
 
-            header.AppendLine($"aliases: [\"{aliasUrl.PathAndQuery}\"]");
+            var originalUrl = new Uri(post.PostUrl);
+
+            var originalFileName = Path.GetFileName(
+                originalUrl.PathAndQuery);
+
+            var alias = Path.Combine(
+                @"\blog\jjameson\archive\",
+                $"{post.DateCreated:yyyy-MM-dd}".Replace("-", "\\"),
+                originalFileName)
+                .Replace('\\', '/');
+
+            header.AppendLine($"aliases: [\"{alias}\"]");
 
             // TODO: Remove "draft" from front matter for final conversion
             header.AppendLine($"draft: true");
