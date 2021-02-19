@@ -10,6 +10,8 @@ namespace BlogML2Hugo
 
         public List<string> Aliases { get; private set; }
 
+        public string Markdown { get; set; }
+
         public BlogMLPost Post { get { return _post; } }
 
         public string Slug { get; set; }

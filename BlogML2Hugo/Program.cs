@@ -6,7 +6,6 @@ using System.Text;
 using System.Xml;
 using BlogML.Xml;
 using Markdig;
-using ReverseMarkdown;
 
 namespace BlogML2Hugo
 {
@@ -75,13 +74,6 @@ namespace BlogML2Hugo
                 .Select(cat => new CategoryRef { Title = cat.Title, Id = cat.ID })
                 .ToDictionary(x => x.Id);
 
-            var config = new ReverseMarkdown.Config
-            {
-                GithubFlavored = true,
-            };
-
-            var mdConverter = new Converter(config);
-
             var convertedPostCount = 0;
 
             IBlogUrlConverter blogUrlConverter =
@@ -107,15 +99,20 @@ namespace BlogML2Hugo
 
                 blogPostPreprocessor.Execute(postConversionData);
 
-                var markdown = mdConverter.Convert(post.Content.UncodedText);
+                IPostConversionStep markdownConversionStep =
+                    new MarkdownConversionStep();
 
-                markdown = Markdown.Normalize(markdown);
+                markdownConversionStep.Execute(postConversionData);
+
+                var markdown = Markdown.Normalize(postConversionData.Markdown);
 
                 markdown = RemoveTrailingSpacesFromEmptyBlockquoteLines(
                     markdown);
 
                 markdown = ReverseMarkdownHelper.DecodeAfterConversion(
                     markdown);
+
+                postConversionData.Markdown = markdown;
 
                 Console.WriteLine($"Writing {postConversionData.Slug} ({post.Title})");
 
@@ -128,7 +125,7 @@ namespace BlogML2Hugo
 
                 var header = ComposeBlogHeader(post, categories, postConversionData);
 
-                WriteConvertedMarkdown(postDir, postConversionData.Slug, header, markdown);
+                WriteConvertedMarkdown(postDir, postConversionData, header);
 
                 convertedPostCount++;
             });
@@ -136,9 +133,12 @@ namespace BlogML2Hugo
             Console.WriteLine($"Posts converted: {convertedPostCount}");
         }
 
-        static void WriteConvertedMarkdown(string outDir, string slug, string header, string markdown)
+        static void WriteConvertedMarkdown(
+            string outDir,
+            PostConversionData postConversionData,
+            string header)
         {
-            var outputFile = Path.Combine(outDir, slug + ".md");
+            var outputFile = Path.Combine(outDir, postConversionData.Slug + ".md");
 
             if (File.Exists(outputFile) == true)
             {
@@ -153,7 +153,7 @@ namespace BlogML2Hugo
 
                 writer.WriteLine();
 
-                writer.WriteLine(markdown);
+                writer.WriteLine(postConversionData.Markdown);
                 writer.WriteLine();
             }
         }
