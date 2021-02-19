@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using BlogML.Xml;
-using Markdig;
 
 namespace BlogML2Hugo
 {
@@ -104,15 +103,10 @@ namespace BlogML2Hugo
 
                 markdownConversionStep.Execute(postConversionData);
 
-                var markdown = Markdown.Normalize(postConversionData.Markdown);
+                IPostConversionStep markdownNormalizationStep =
+                    new MarkdownNormalizationStep();
 
-                markdown = RemoveTrailingSpacesFromEmptyBlockquoteLines(
-                    markdown);
-
-                markdown = ReverseMarkdownHelper.DecodeAfterConversion(
-                    markdown);
-
-                postConversionData.Markdown = markdown;
+                markdownNormalizationStep.Execute(postConversionData);
 
                 Console.WriteLine($"Writing {postConversionData.Slug} ({post.Title})");
 
@@ -219,20 +213,6 @@ namespace BlogML2Hugo
 
             header.AppendLine("---");
             return header.ToString();
-        }
-
-
-        private static string RemoveTrailingSpacesFromEmptyBlockquoteLines(
-            string markdown)
-        {
-            int index = markdown.IndexOf("\n" + "> " + "\n");
-
-            if (index == -1)
-            {
-                return markdown;
-            }
-
-            return markdown.Replace("\n> \n", "\n>\n");
         }
     }
 }
