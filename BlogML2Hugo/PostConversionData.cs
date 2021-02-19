@@ -10,6 +10,8 @@ namespace BlogML2Hugo
 
         public List<string> Aliases { get; private set; }
 
+        public List<string> Categories { get; private set; }
+
         public string Markdown { get; set; }
 
         public BlogMLPost Post { get { return _post; } }
@@ -30,6 +32,7 @@ namespace BlogML2Hugo
             _post = post;
 
             Aliases = new List<string>();
+            Categories = new List<string>();
             Tags = new List<string>();
         }
     }

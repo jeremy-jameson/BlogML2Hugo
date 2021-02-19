@@ -108,6 +108,11 @@ namespace BlogML2Hugo
 
                 markdownNormalizationStep.Execute(postConversionData);
 
+                IPostConversionStep categoryLookupStep =
+                    new CategoryLookupStep(categories);
+
+                categoryLookupStep.Execute(postConversionData);
+
                 Console.WriteLine($"Writing {postConversionData.Slug} ({post.Title})");
 
                 var postDir = Path.Combine(outDir, postConversionData.Subfolder);
@@ -117,7 +122,7 @@ namespace BlogML2Hugo
                     Directory.CreateDirectory(postDir);
                 }
 
-                var header = ComposeBlogHeader(post, categories, postConversionData);
+                var header = ComposeBlogHeader(post, postConversionData);
 
                 WriteConvertedMarkdown(postDir, postConversionData, header);
 
@@ -154,7 +159,6 @@ namespace BlogML2Hugo
 
         static string ComposeBlogHeader(
             BlogMLPost post,
-            Dictionary<string, CategoryRef> categories,
             PostConversionData postConversionData)
         {
             var header = new StringBuilder("---");
@@ -188,15 +192,7 @@ namespace BlogML2Hugo
             // TODO: Remove "draft" from front matter for final conversion
             header.AppendLine($"draft: true");
 
-            var categoryList = new List<string>();
-
-            foreach (BlogMLCategoryReference category in post.Categories)
-            {
-                var cat = categories[category.Ref];
-                categoryList.Add(cat.Title);
-            }
-
-            var joinedCategories = "\"" + string.Join("\", \"", categoryList) + "\"";
+            var joinedCategories = "\"" + string.Join("\", \"", postConversionData.Categories) + "\"";
 
             header.Append($"categories: [");
             header.Append(joinedCategories);
