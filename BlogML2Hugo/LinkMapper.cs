@@ -68,6 +68,11 @@ namespace BlogML2Hugo
             return _blogUrlConverter.GetPermalink(url);
         }
 
+        public string GetSlug(Uri url)
+        {
+            return _blogUrlConverter.GetSlug(url);
+        }
+
         public bool IsBlogUrl(Uri url)
         {
             return _blogUrlConverter.IsBlogUrl(url);

@@ -105,45 +105,9 @@ namespace BlogML2Hugo
                 blogPostTagExtractor.Execute(postConversionData);
 
                 IPostConversionStep blogPostPreprocessor =
-                    new TechnologyToolboxBlogPostPreprocessor();
+                    new TechnologyToolboxBlogPostPreprocessor(linkMapper);
 
                 blogPostPreprocessor.Execute(postConversionData);
-
-                var postUrl = new Uri(post.PostUrl);
-
-                postConversionData.Slug = blogUrlConverter.GetSlug(postUrl);
-
-                // Organize blog posts by year/month/day
-
-                postConversionData.Subfolder =
-                    $"{post.DateCreated.ToLocalTime():yyyy-MM-dd}"
-                    .Replace("-", "\\");
-
-                // Since the dates for blog posts have been updated -- for
-                // example, to account for the migration from MSDN (Telligent)
-                // to Technology Toolbox (Subtext) -- overwrite the post URLs
-                // as necessary. In other words, Subtext didn't have the correct
-                // dates for the blog posts migrated from MSDN, so the URLs
-                // specified in the BlogML file are often "off" by a day.
-
-                Uri url = new Uri(
-                    string.Concat(
-                        "https://www.technologytoolbox.com/blog/jjameson/archive/",
-                        postConversionData.Subfolder.Replace("\\", "/"),
-                        "/",
-                        postConversionData.Slug,
-                        ".aspx"));
-
-                postConversionData.Aliases.Add(postUrl.PathAndQuery);
-
-                if (post.PostUrl != url.AbsoluteUri)
-                {
-                    post.PostUrl = url.AbsoluteUri;
-
-                    postConversionData.Aliases.Add(url.PathAndQuery);
-                }
-
-                linkMapper.Add(url);
 
                 var postHtml = post.Content.UncodedText;
 
