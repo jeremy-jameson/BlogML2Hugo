@@ -6,6 +6,7 @@ namespace BlogML2Hugo
 {
     public class PostConversionData
     {
+        private readonly string _outputDirectory;
         private readonly BlogMLPost _post;
 
         public List<string> Aliases { get; private set; }
@@ -13,6 +14,8 @@ namespace BlogML2Hugo
         public List<string> Categories { get; private set; }
 
         public string Markdown { get; set; }
+
+        public string OutputDirectory { get { return _outputDirectory; } }
 
         public BlogMLPost Post { get { return _post; } }
 
@@ -22,13 +25,25 @@ namespace BlogML2Hugo
 
         public List<string> Tags { get; private set; }
 
-        public PostConversionData(BlogMLPost post)
+        public PostConversionData(BlogMLPost post, string outputDirectory)
         {
             if (post == null)
             {
                 throw new ArgumentNullException("post");
             }
 
+            if (outputDirectory == null)
+            {
+                throw new ArgumentNullException("outputDirectory");
+            }
+            else if (string.IsNullOrWhiteSpace(outputDirectory) == true)
+            {
+                throw new ArgumentException(
+                    "Output directory name must be specified.",
+                    "outputDirectory");
+            }
+
+            _outputDirectory = outputDirectory;
             _post = post;
 
             Aliases = new List<string>();

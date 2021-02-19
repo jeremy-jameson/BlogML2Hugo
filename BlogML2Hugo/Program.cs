@@ -82,7 +82,7 @@ namespace BlogML2Hugo
 
             blog.Posts.ForEach(post =>
             {
-                var postConversionData = new PostConversionData(post);
+                var postConversionData = new PostConversionData(post, outDir);
 
                 // Extract tags *before* preprocessing blog post (for example,
                 // to allow the preprocessor to remove tags embedded in the
@@ -117,98 +117,15 @@ namespace BlogML2Hugo
 
                 var postDir = Path.Combine(outDir, postConversionData.Subfolder);
 
-                if (!Directory.Exists(postDir))
-                {
-                    Directory.CreateDirectory(postDir);
-                }
+                IPostConversionStep saveMarkdownStep =
+                    new SaveMarkdownStep();
 
-                var header = ComposeBlogHeader(post, postConversionData);
-
-                WriteConvertedMarkdown(postDir, postConversionData, header);
+                saveMarkdownStep.Execute(postConversionData);
 
                 convertedPostCount++;
             });
 
             Console.WriteLine($"Posts converted: {convertedPostCount}");
-        }
-
-        static void WriteConvertedMarkdown(
-            string outDir,
-            PostConversionData postConversionData,
-            string header)
-        {
-            var outputFile = Path.Combine(outDir, postConversionData.Slug + ".md");
-
-            if (File.Exists(outputFile) == true)
-            {
-                File.Delete(outputFile);
-            }
-
-            using (var file = File.OpenWrite(outputFile))
-            using (var writer = new StreamWriter(file))
-            {
-                writer.Write(header);
-                writer.Flush();
-
-                writer.WriteLine();
-
-                writer.WriteLine(postConversionData.Markdown);
-                writer.WriteLine();
-            }
-        }
-
-        static string ComposeBlogHeader(
-            BlogMLPost post,
-            PostConversionData postConversionData)
-        {
-            var header = new StringBuilder("---");
-            header.AppendLine();
-
-            var escapedTitle = post.Title.Replace("\"", "\\\"");
-
-            header.AppendLine($"title: \"{escapedTitle}\"");
-            header.AppendLine($"date: {post.DateCreated.ToLocalTime():yyyy-MM-ddTHH:mm:ssK}");
-
-            if (post.DateModified != post.DateCreated)
-            {
-                header.AppendLine($"lastmod: {post.DateModified.ToLocalTime():yyyy-MM-ddTHH:mm:ssK}");
-            }
-
-            if (post.HasExcerpt)
-            {
-                var escapedExcerpt = post.Excerpt.UncodedText
-                    .Replace(@"\", @"\\")
-                    .Replace("\"", "\\\"");
-
-                header.AppendLine($"excerpt: \"{escapedExcerpt}\"");
-            }
-
-            var joinedAliases = "\"" + string.Join("\", \"", postConversionData.Aliases) + "\"";
-
-            header.Append($"aliases: [");
-            header.Append(joinedAliases);
-            header.AppendLine("]");
-
-            // TODO: Remove "draft" from front matter for final conversion
-            header.AppendLine($"draft: true");
-
-            var joinedCategories = "\"" + string.Join("\", \"", postConversionData.Categories) + "\"";
-
-            header.Append($"categories: [");
-            header.Append(joinedCategories);
-            header.AppendLine("]");
-
-            header.Append($"tags: [");
-
-            var joinedTags = "\"" + string.Join("\", \"", postConversionData.Tags) + "\"";
-
-            header.Append(joinedTags);
-            header.AppendLine("]");
-            // header.AppendLine("isCJKLanguage: true");
-
-
-            header.AppendLine("---");
-            return header.ToString();
         }
     }
 }
