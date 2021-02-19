@@ -19,7 +19,7 @@ namespace BlogML2Hugo
             _blogMLDoc = blogMLDoc;
         }
 
-        public IEnumerable<string> GetTags(BlogMLPost post)
+        public virtual IEnumerable<string> GetTags(BlogMLPost post)
         {
             if (post == null)
             {
