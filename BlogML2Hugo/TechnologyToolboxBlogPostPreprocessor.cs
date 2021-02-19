@@ -25,7 +25,7 @@ namespace BlogML2Hugo
         {
             var post = postConversionData.Post;
 
-            FixTechnologyToolboxBlogPostDates(post);
+            FixBlogPostDates(post);
 
             var postHtml = post.Content.UncodedText;
 
@@ -75,14 +75,14 @@ namespace BlogML2Hugo
 
             _linkMapper.Add(url);
 
-            ProcessTechnologyToolboxBlogPost(htmlDoc, _linkMapper);
+            ProcessBlogPost(htmlDoc, _linkMapper);
 
             post.Content = BlogMLContent.Create(
                 htmlDoc.DocumentNode.OuterHtml,
                 ContentTypes.Html);
         }
 
-        private static void FixTechnologyToolboxBlogPostDates(BlogMLPost post)
+        private static void FixBlogPostDates(BlogMLPost post)
         {
             // When migrating blog posts from MSDN (running Telligent) to
             // Technoogy Toolbox (running Subtext), the dates were offset
@@ -136,32 +136,32 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void ProcessTechnologyToolboxBlogPost(
+        private static void ProcessBlogPost(
             HtmlDocument doc,
             LinkMapper linkMapper)
         {
             FixSpacesInsideEmphasisElements(doc);
-            ProcessTechnologyToolboxBlogCallouts(doc);
+            ProcessBlogCallouts(doc);
 
-            ProcessTechnologyToolboxBlogKbdContentInsideConsoleBlocks(doc);
+            ProcessBlogKbdContentInsideConsoleBlocks(doc);
 
-            ProcessTechnologyToolboxBlogConsoleBlocks(doc);
-            ReplaceTechnologyToolboxBlogKbdElements(doc);
-            ProcessTechnologyToolboxBlogLinks(doc, linkMapper);
-            ProcessTechnologyToolboxBlogTableCells(doc);
-            ProcessTechnologyToolboxBlogTables(doc);
-            ReplaceTechnologyToolboxBlogImages(doc);
-            ReplaceTechnologyToolboxBlogReferences(doc);
-            ReplaceTechnologyToolboxBlogSampElements(doc);
+            ProcessBlogConsoleBlocks(doc);
+            ReplaceBlogKbdElements(doc);
+            ProcessBlogLinks(doc, linkMapper);
+            ProcessBlogTableCells(doc);
+            ProcessBlogTables(doc);
+            ReplaceBlogImages(doc);
+            ReplaceBlogReferences(doc);
+            ReplaceBlogSampElements(doc);
         }
 
-        private static void ProcessTechnologyToolboxBlogCallouts(HtmlDocument doc)
+        private static void ProcessBlogCallouts(HtmlDocument doc)
         {
-            ProcessTechnologyToolboxBlogDirectQuotes(doc);
-            ProcessTechnologyToolboxBlogNotes(doc);
+            ProcessBlogDirectQuotes(doc);
+            ProcessBlogNotes(doc);
         }
 
-        private static void ProcessTechnologyToolboxBlogDirectQuotes(HtmlDocument doc)
+        private static void ProcessBlogDirectQuotes(HtmlDocument doc)
         {
             // Replaces blog post content similar to the following:
             //
@@ -234,7 +234,7 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void ProcessTechnologyToolboxBlogNotes(HtmlDocument doc)
+        private static void ProcessBlogNotes(HtmlDocument doc)
         {
             // Replaces blog post content similar to the following:
             //
@@ -289,7 +289,7 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void ProcessTechnologyToolboxBlogConsoleBlocks(HtmlDocument doc)
+        private static void ProcessBlogConsoleBlocks(HtmlDocument doc)
         {
             // Replaces blog post content similar to the following:
             //
@@ -361,7 +361,7 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void ProcessTechnologyToolboxBlogKbdContentInsideConsoleBlocks(HtmlDocument doc)
+        private static void ProcessBlogKbdContentInsideConsoleBlocks(HtmlDocument doc)
         {
             // Replaces blog post content similar to the following:
             //
@@ -423,7 +423,7 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void ProcessTechnologyToolboxBlogLinks(
+        private static void ProcessBlogLinks(
             HtmlDocument doc,
             LinkMapper linkMapper)
         {
@@ -450,7 +450,7 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void ProcessTechnologyToolboxBlogTables(HtmlDocument doc)
+        private static void ProcessBlogTables(HtmlDocument doc)
         {
             // Replaces blog post content similar to the following:
             //
@@ -547,7 +547,7 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void ProcessTechnologyToolboxBlogTableCells(HtmlDocument doc)
+        private static void ProcessBlogTableCells(HtmlDocument doc)
         {
             // Normalize whitespace in "simple" <td> content to fix a number of
             // issues during the Markdown process
@@ -751,7 +751,7 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void ReplaceTechnologyToolboxBlogImages(HtmlDocument doc)
+        private static void ReplaceBlogImages(HtmlDocument doc)
         {
             // Replaces blog post content similar to the following:
             //
@@ -843,7 +843,7 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void ReplaceTechnologyToolboxBlogKbdElements(
+        private static void ReplaceBlogKbdElements(
             HtmlDocument doc)
         {
             // Replaces blog post content similar to the following:
@@ -878,7 +878,7 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void ReplaceTechnologyToolboxBlogReferences(HtmlDocument doc)
+        private static void ReplaceBlogReferences(HtmlDocument doc)
         {
             // Replaces blog post content similar to the following:
             //
@@ -972,7 +972,7 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void ReplaceTechnologyToolboxBlogSampElements(
+        private static void ReplaceBlogSampElements(
             HtmlDocument doc)
         {
             // Replace simple inline content like the following:
