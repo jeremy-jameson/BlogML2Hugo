@@ -146,6 +146,7 @@ namespace BlogML2Hugo
             ProcessBlogKbdContentInsideConsoleBlocks(doc);
 
             ProcessBlogConsoleBlocks(doc);
+            ProcessBlogLineThroughContent(doc);
             ReplaceBlogKbdElements(doc);
             ProcessBlogLinks(doc, linkMapper);
             ProcessBlogTableCells(doc);
@@ -357,6 +358,93 @@ namespace BlogML2Hugo
                     paragraph.ChildNodes.Add(shortcodeNode);
 
                     element.ParentNode.InsertAfter(paragraph, element);
+                }
+            }
+        }
+
+        private static void ProcessBlogLineThroughContent(HtmlDocument doc)
+        {
+            // Replace simple inline content like the following:
+            //
+            //    <span style="text-decoration: line-through">...</span>
+            //
+            // with:
+            //
+            //    <span style="text-decoration: line-through">~~...~~</span>
+            //
+            // For multi-line content similar to the following:
+            //
+            //   <div>
+            //     <ul>...</ul>
+            //   </div>
+            //
+            // wrap the content with a custom Hugo shortcode that will insert
+            // <del> elements when the Markdown is subsequently converted to
+            // HTML:
+            //
+            //   <p>{{< deleted-block }}<p>
+            //   <div>
+            //     <ul>...</ul>
+            //   </div>
+            //   <p>{{< /deleted-block }}</p>
+
+            var elements = doc.DocumentNode.SelectNodes(
+                "//*[contains(@style, 'line-through')]");
+
+            if (elements != null)
+            {
+                foreach (var element in elements)
+                {
+                    if (element.Name == "span")
+                    {
+                        // For inline content, surround the <span> element with
+                        // "~~" (which, after converting to Markdown, will be
+                        // replaced by Hugo with <del> tags
+                        element.ParentNode.InsertBefore(
+                            doc.CreateTextNode("~~"),
+                            element);
+
+                        element.ParentNode.InsertAfter(
+                            doc.CreateTextNode("~~"),
+                            element);
+                    }
+                    else
+                    {
+                        // For block content insert paragraph containing Hugo
+                        // shortcode "{{< deleted-block >}}" before the
+                        // "line-through" element
+
+                        var shortcodeBuilder = new HugoShortcodeNodeBuilder();
+
+                        var shortcodeNode = shortcodeBuilder
+                            .ForHtmlDocument(element.OwnerDocument)
+                            .WithHtmlNodeName("div")
+                            .WithName("deleted-block")
+                            .Build();
+
+                        var paragraph = element.OwnerDocument.CreateElement("p");
+
+                        paragraph.ChildNodes.Add(shortcodeNode);
+
+                        element.ParentNode.InsertBefore(paragraph, element);
+
+                        // Insert paragraph containing Hugo shortcode
+                        // "{{< /deleted-block >}}" after the "line-through" element
+
+                        shortcodeBuilder = new HugoShortcodeNodeBuilder();
+
+                        shortcodeNode = shortcodeBuilder
+                            .ForHtmlDocument(element.OwnerDocument)
+                            .WithHtmlNodeName("div")
+                            .WithName("/deleted-block")
+                            .Build();
+
+                        paragraph = element.OwnerDocument.CreateElement("p");
+
+                        paragraph.ChildNodes.Add(shortcodeNode);
+
+                        element.ParentNode.InsertAfter(paragraph, element);
+                    }
                 }
             }
         }
