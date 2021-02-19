@@ -1,4 +1,6 @@
-﻿using BlogML.Xml;
+﻿using BlogML;
+using BlogML.Xml;
+using HtmlAgilityPack;
 using System;
 
 namespace BlogML2Hugo
@@ -8,7 +10,20 @@ namespace BlogML2Hugo
         public void Process(BlogMLPost post)
         {
             FixTechnologyToolboxBlogPostDates(post);
+
+            var postHtml = post.Content.UncodedText;
+
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(postHtml);
+            {
+                RemoveTagsFromPostContent(htmlDoc);
+            }
+
+            postHtml = htmlDoc.DocumentNode.OuterHtml;
+
+            post.Content = BlogMLContent.Create(postHtml, ContentTypes.Html);
         }
+
         private static void FixTechnologyToolboxBlogPostDates(BlogMLPost post)
         {
             // When migrating blog posts from MSDN (running Telligent) to
@@ -60,6 +75,34 @@ namespace BlogML2Hugo
                 post.DateModified = DateTime.SpecifyKind(
                     post.DateModified,
                     DateTimeKind.Local);
+            }
+        }
+
+        private static void RemoveTagsFromPostContent(HtmlDocument doc)
+        {
+            // Removes blog post content similar to the following:
+            //
+            //    <h3>
+            //      Tags</h3>
+            //    <ul>
+            //      <li><a href="..." rel="tag">My System</a></li>
+            //      <li><a href="..." rel="tag">Toolbox</a></li>
+            //    </ul>
+
+            var tagsList = doc.DocumentNode.SelectSingleNode(
+                "//h3[normalize-space() = 'Tags']/following-sibling::ul");
+
+            if (tagsList != null)
+            {
+                tagsList.Remove();
+            }
+
+            var tagsHeading = doc.DocumentNode.SelectSingleNode(
+                "//h3[normalize-space() = 'Tags']");
+
+            if (tagsHeading != null)
+            {
+                tagsHeading.Remove();
             }
         }
     }

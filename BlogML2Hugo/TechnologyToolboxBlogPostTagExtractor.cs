@@ -26,12 +26,7 @@ namespace BlogML2Hugo
                 htmlDoc.LoadHtml(postHtml);
                 {
                     tags = GetTagsFromPostContent(htmlDoc);
-                    RemoveTagsFromPostContent(htmlDoc);
                 }
-
-                postHtml = htmlDoc.DocumentNode.OuterHtml;
-
-                post.Content = BlogMLContent.Create(postHtml, ContentTypes.Html);
             }
 
             return tags;
@@ -66,34 +61,6 @@ namespace BlogML2Hugo
             }
 
             return tags;
-        }
-
-        private static void RemoveTagsFromPostContent(HtmlDocument doc)
-        {
-            // Removes blog post content similar to the following:
-            //
-            //    <h3>
-            //      Tags</h3>
-            //    <ul>
-            //      <li><a href="..." rel="tag">My System</a></li>
-            //      <li><a href="..." rel="tag">Toolbox</a></li>
-            //    </ul>
-
-            var tagsList = doc.DocumentNode.SelectSingleNode(
-                "//h3[normalize-space() = 'Tags']/following-sibling::ul");
-
-            if (tagsList != null)
-            {
-                tagsList.Remove();
-            }
-
-            var tagsHeading = doc.DocumentNode.SelectSingleNode(
-                "//h3[normalize-space() = 'Tags']");
-
-            if (tagsHeading != null)
-            {
-                tagsHeading.Remove();
-            }
         }
     }
 }
