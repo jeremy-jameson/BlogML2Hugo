@@ -1,6 +1,4 @@
-﻿using BlogML.Xml;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Xml;
 
 namespace BlogML2Hugo

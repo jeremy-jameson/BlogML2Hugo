@@ -1,6 +1,4 @@
-﻿using BlogML.Xml;
-
-namespace BlogML2Hugo
+﻿namespace BlogML2Hugo
 {
     public interface IPostConversionStep
     {
