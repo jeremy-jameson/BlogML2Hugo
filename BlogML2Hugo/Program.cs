@@ -93,6 +93,15 @@ namespace BlogML2Hugo
 
             blog.Posts.ForEach(post =>
             {
+                // Extract tags *before* preprocessing blog post (for example,
+                // to allow the preprocessor to remove tags embedded in the
+                // content of the post)
+
+                IBlogPostTagExtractor blogPostTagExtractor =
+                    new TechnologyToolboxBlogPostTagExtractor(blogDoc);
+
+                var tags = blogPostTagExtractor.GetTags(post);
+
                 IBlogPostPreprocessor blogPostPreprocessor =
                     new TechnologyToolboxBlogPostPreprocessor();
 
@@ -135,10 +144,6 @@ namespace BlogML2Hugo
 
                 linkMapper.Add(url);
 
-                IBlogPostTagExtractor blogPostTagExtractor =
-                    new TechnologyToolboxBlogPostTagExtractor(blogDoc);
-
-                var tags = blogPostTagExtractor.GetTags(post);
                 var postHtml = post.Content.UncodedText;
 
                 var htmlDoc = new HtmlDocument();
