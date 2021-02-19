@@ -99,13 +99,10 @@ namespace BlogML2Hugo
                 // to allow the preprocessor to remove tags embedded in the
                 // content of the post)
 
-                IBlogPostTagExtractor blogPostTagExtractor =
+                IPostConversionStep blogPostTagExtractor =
                     new TechnologyToolboxBlogPostTagExtractor(blogDoc);
 
-                blogPostTagExtractor.GetTags(post).ToList().ForEach(tag =>
-                {
-                    postConversionData.Tags.Add(tag);
-                });
+                blogPostTagExtractor.Execute(postConversionData);
 
                 IPostConversionStep blogPostPreprocessor =
                     new TechnologyToolboxBlogPostPreprocessor();

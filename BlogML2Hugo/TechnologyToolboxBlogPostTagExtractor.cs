@@ -14,22 +14,22 @@ namespace BlogML2Hugo
         {
         }
 
-        public override IEnumerable<string> GetTags(BlogMLPost post)
+        public override void Execute(PostConversionData postConversionData)
         {
-            var tags = base.GetTags(post);
+            base.Execute(postConversionData);
 
-            if (tags.Any() == false)
+            if (postConversionData.Tags.Any() == false)
             {
-                var postHtml = post.Content.UncodedText;
+                var postHtml = postConversionData.Post.Content.UncodedText;
 
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(postHtml);
                 {
-                    tags = GetTagsFromPostContent(htmlDoc);
+                    var tags = GetTagsFromPostContent(htmlDoc);
+
+                    postConversionData.Tags.AddRange(tags);
                 }
             }
-
-            return tags;
         }
 
         private static List<string> GetTagsFromPostContent(HtmlDocument doc)

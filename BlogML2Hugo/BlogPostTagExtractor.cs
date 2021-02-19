@@ -5,7 +5,7 @@ using System.Xml;
 
 namespace BlogML2Hugo
 {
-    class BlogPostTagExtractor : IBlogPostTagExtractor
+    class BlogPostTagExtractor : IPostConversionStep
     {
         private readonly XmlDocument _blogMLDoc;
 
@@ -19,14 +19,15 @@ namespace BlogML2Hugo
             _blogMLDoc = blogMLDoc;
         }
 
-        public virtual IEnumerable<string> GetTags(BlogMLPost post)
+        public virtual void Execute(PostConversionData postConversionData)
         {
-            if (post == null)
+            if (postConversionData == null)
             {
-                throw new ArgumentNullException("post");
+                throw new ArgumentNullException("postConversionData");
             }
 
-            var tags = new List<string>();
+            var post = postConversionData.Post;
+
             var root = _blogMLDoc.DocumentElement;
             var mgr = new XmlNamespaceManager(_blogMLDoc.NameTable);
             mgr.AddNamespace("xs", "http://www.w3.org/2001/XMLSchema");
@@ -37,10 +38,8 @@ namespace BlogML2Hugo
 
             foreach (XmlNode tag in tagList)
             {
-                tags.Add(tag.Attributes["ref"].InnerText);
+                postConversionData.Tags.Add(tag.Attributes["ref"].InnerText);
             }
-
-            return tags;
         }
     }
 }
