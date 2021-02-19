@@ -91,11 +91,46 @@ namespace BlogML2Hugo
 
             var linkMapper = new LinkMapper(blogUrlConverter);
 
-            InitializeLinkMapperFromBlogPosts(linkMapper, blog.Posts);
-
             blog.Posts.ForEach(post =>
             {
-                var slug = blogUrlConverter.GetSlug(new Uri(post.PostUrl));
+                FixTechnologyToolboxBlogPostDates(post);
+
+                var postUrl = new Uri(post.PostUrl);
+
+                var slug = blogUrlConverter.GetSlug(postUrl);
+
+                // Organize blog posts by year/month/day
+
+                var subfolder = $"{post.DateCreated.ToLocalTime():yyyy-MM-dd}"
+                    .Replace("-", "\\");
+
+                // Since the dates for blog posts have been updated -- for
+                // example, to account for the migration from MSDN (Telligent)
+                // to Technology Toolbox (Subtext) -- overwrite the post URLs
+                // as necessary. In other words, Subtext didn't have the correct
+                // dates for the blog posts migrated from MSDN, so the URLs
+                // specified in the BlogML file are often "off" by a day.
+
+                Uri url = new Uri(
+                    string.Concat(
+                        "https://www.technologytoolbox.com/blog/jjameson/archive/",
+                        subfolder.Replace("\\", "/"),
+                        "/",
+                        slug,
+                        ".aspx"));
+
+                var postAliases = new List<string>();
+
+                postAliases.Add(postUrl.PathAndQuery);
+
+                if (post.PostUrl != url.AbsoluteUri)
+                {
+                    post.PostUrl = url.AbsoluteUri;
+
+                    postAliases.Add(url.PathAndQuery);
+                }
+
+                linkMapper.Add(url);
 
                 var tags = GetTags(blogDoc, post.ID);
 
@@ -126,55 +161,6 @@ namespace BlogML2Hugo
 
                 Console.WriteLine($"Writing {slug} ({post.Title})");
 
-                // Use LinkMapper.GetPermalink to organize blog posts by the
-                // "authoritative" year/month/day URL (which is determined
-                // by initialize the LinkMapper from <a> elements in blog posts)
-
-                var permalink = linkMapper.FindPermalinkBySlug(slug);
-
-                string subfolder = null;
-
-                if (permalink == null)
-                {
-                    // The blog post is not referenced by any other blog posts
-                    //
-                    // In this case, we might need to overwrite the value from
-                    // the "post-url" attribute in the BlogML file
-                    //
-                    // For example:
-                    //
-                    //   "https://www.technologytoolbox.com/blog/jjameson/archive/2007/04/23/team-based-development-in-microsoft-office-sharepoint-server-2007.aspx"
-                    //
-                    // should be:
-                    //
-                    //   "https://www.technologytoolbox.com/blog/jjameson/archive/2007/04/24/team-based-development-in-microsoft-office-sharepoint-server-2007.aspx"
-
-                    subfolder = $"{post.DateCreated:yyyy-MM-dd}"
-                        .Replace("-", "\\");
-
-                    Uri url = new Uri(
-                        string.Concat(
-                            "https://www.technologytoolbox.com/blog/jjameson/archive/",
-                            subfolder.Replace("\\", "/"),
-                            "/",
-                            slug,
-                            ".aspx"));
-
-                    if (post.PostUrl != url.AbsoluteUri)
-                    {
-                        post.PostUrl = url.AbsoluteUri;
-                    }
-
-                    linkMapper.Add(url);
-                }
-                else
-                {
-                    var relativePath = permalink.PathAndQuery
-                        .Replace("/blog/jjameson/", "");
-
-                    subfolder = Path.GetDirectoryName(relativePath);
-                }
-                
                 var postDir = Path.Combine(outDir, subfolder);
 
                 if (!Directory.Exists(postDir))
@@ -182,7 +168,7 @@ namespace BlogML2Hugo
                     Directory.CreateDirectory(postDir);
                 }
 
-                var header = ComposeBlogHeader(post, categories, tags, linkMapper);
+                var header = ComposeBlogHeader(post, categories, tags, postAliases);
 
                 WriteConvertedMarkdown(postDir, slug, header, markdown);
 
@@ -218,7 +204,7 @@ namespace BlogML2Hugo
             BlogMLPost post,
             Dictionary<string, CategoryRef> categories,
             IEnumerable<string> tags,
-            LinkMapper linkMapper)
+            List<string> postAliases)
         {
             var header = new StringBuilder("---");
             header.AppendLine();
@@ -226,11 +212,11 @@ namespace BlogML2Hugo
             var escapedTitle = post.Title.Replace("\"", "\\\"");
 
             header.AppendLine($"title: \"{escapedTitle}\"");
-            header.AppendLine($"date: {post.DateCreated:yyyy-MM-ddTHH:mm:ss}-07:00");
+            header.AppendLine($"date: {post.DateCreated.ToLocalTime():yyyy-MM-ddTHH:mm:ssK}");
 
             if (post.DateModified != post.DateCreated)
             {
-                header.AppendLine($"lastmod: {post.DateModified:yyyy-MM-ddTHH:mm:ss}-07:00");
+                header.AppendLine($"lastmod: {post.DateModified.ToLocalTime():yyyy-MM-ddTHH:mm:ssK}");
             }
 
             if (post.HasExcerpt)
@@ -242,40 +228,11 @@ namespace BlogML2Hugo
                 header.AppendLine($"excerpt: \"{escapedExcerpt}\"");
             }
 
-            // Generate alias using LinkMapper.GetPermalink to ensure the alias
-            // contains the URL specified in <a> elements in blog posts -- as
-            // opposed to, say, the "post-url" attribute in the BlogML file
-            // (which, for Subtext, isn't always the same)
-            //
-            // For example, the following URL is specified in the BlogML file:
-            //
-            //   https://www.technologytoolbox.com/blog/jjameson/archive/2007/03/02/who-is-this-guy.aspx
-            //
-            // However, the "authoritative" URL for that blog post is:
-            //
-            //   https://www.technologytoolbox.com/blog/jjameson/archive/2007/03/03/who-is-this-guy.aspx
-            //
-            // Note the day in the URL is different ("02" --> "03")
+            var joinedAliases = "\"" + string.Join("\", \"", postAliases) + "\"";
 
-            var originalUrl = new Uri(post.PostUrl);
-
-            var permalink = linkMapper.GetPermalink(originalUrl);
-
-            // Convert permalink back to Subtext format
-            //
-            // For example, the alias for:
-            //
-            //   "/blog/jjameson/2007/03/03/who-is-this-guy"
-            //
-            // should be:
-            //
-            //   "/blog/jjameson/archive/2007/03/03/who-is-this-guy.aspx"
-
-            var previousUrl = permalink.PathAndQuery.Replace(
-                "/blog/jjameson/",
-                "/blog/jjameson/archive/") + ".aspx";
-
-            header.AppendLine($"aliases: [\"{previousUrl}\"]");
+            header.Append($"aliases: [");
+            header.Append(joinedAliases);
+            header.AppendLine("]");
 
             // TODO: Remove "draft" from front matter for final conversion
             header.AppendLine($"draft: true");
@@ -305,6 +262,60 @@ namespace BlogML2Hugo
 
             header.AppendLine("---");
             return header.ToString();
+        }
+
+        private static void FixTechnologyToolboxBlogPostDates(BlogMLPost post)
+        {
+            // When migrating blog posts from MSDN (running Telligent) to
+            // Technoogy Toolbox (running Subtext), the dates were offset
+            // by a number of hours. Consequently the "day" portion of URLs
+            // did not always match "date created" -- i.e. it could be off
+            // by a day. This was likely due to the "lossy" date format
+            // specified in the BlogML file used to export content from
+            // Telligent into Subtext.
+            //
+            // In other words, all of the issues due to date/URL mismatch
+            // seems to be due to dateCreated.ToString("s") -- since that
+            // format does not preserve the timezone information. (Note
+            // that Subtext suffers a similar issue in the BlogML export.)
+            //
+            // To resolve these issues (hopefully for the last time),
+            // convert "Unspecified" DateTime values into "Local" DateTime
+            // equivalents. However, note that blog posts created in
+            // Subtext (i.e. not migrated from MSDN/Telligent) already
+            // have the correct timestamp values and therefore should simply
+            // be "forced" from "Unspecified" to "Local" without adjusting
+            // the DateTime values.
+
+            var msdnBlogCutoverDate = new DateTime(2011, 9, 3);
+
+            if (post.DateCreated.Kind == DateTimeKind.Unspecified)
+            {
+                var offset = TimeZoneInfo.Local.GetUtcOffset(post.DateCreated);
+
+                if (post.DateCreated < msdnBlogCutoverDate)
+                {
+                    post.DateCreated = post.DateCreated.Add(-offset);
+                }
+
+                post.DateCreated = DateTime.SpecifyKind(
+                    post.DateCreated,
+                    DateTimeKind.Local);
+            }
+
+            if (post.DateModified.Kind == DateTimeKind.Unspecified)
+            {
+                var offset = TimeZoneInfo.Local.GetUtcOffset(post.DateCreated);
+
+                if (post.DateModified < msdnBlogCutoverDate)
+                {
+                    post.DateModified = post.DateModified.Add(-offset);
+                }
+
+                post.DateModified = DateTime.SpecifyKind(
+                    post.DateModified,
+                    DateTimeKind.Local);
+            }
         }
 
         private static HashSet<string> GetAllowedKbdContent()
@@ -386,45 +397,6 @@ namespace BlogML2Hugo
             }
 
             return tags;
-        }
-
-        private static void InitializeLinkMapperFromBlogPosts(
-            LinkMapper linkMapper,
-            BlogMLBlog.PostCollection posts)
-        {
-            // Initialize link mapper by parsing blog post links
-            //
-            // In other words, treat the "href" attributes in blog post <a>
-            // elements as the authoritative source for permalinks
-            //
-            // This is necessary because the BlogML file generated by Subtext
-            // does not contain the expected URLs (in the "post-url" attributes)
-
-            posts.ForEach(post =>
-            {
-                var doc = new HtmlDocument();
-                doc.LoadHtml(post.Content.UncodedText);
-
-                var links = doc.DocumentNode.SelectNodes("//a");
-
-                if (links != null)
-                {
-                    foreach (var link in links)
-                    {
-                        if (link.Attributes.Contains("href"))
-                        {
-                            var href = link.Attributes["href"].Value;
-
-                            var url = new Uri(href, UriKind.RelativeOrAbsolute);
-
-                            if (linkMapper.IsBlogUrl(url) == true)
-                            {
-                                linkMapper.Add(url);
-                            }
-                        }
-                    }
-                }
-            });
         }
 
         private static string RemoveTrailingSpacesFromEmptyBlockquoteLines(
