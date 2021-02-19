@@ -93,6 +93,8 @@ namespace BlogML2Hugo
 
             blog.Posts.ForEach(post =>
             {
+                var postConversionData = new PostConversionData();
+
                 // Extract tags *before* preprocessing blog post (for example,
                 // to allow the preprocessor to remove tags embedded in the
                 // content of the post)
@@ -100,7 +102,10 @@ namespace BlogML2Hugo
                 IBlogPostTagExtractor blogPostTagExtractor =
                     new TechnologyToolboxBlogPostTagExtractor(blogDoc);
 
-                var tags = blogPostTagExtractor.GetTags(post);
+                blogPostTagExtractor.GetTags(post).ToList().ForEach(tag =>
+                {
+                    postConversionData.Tags.Add(tag);
+                });
 
                 IBlogPostPreprocessor blogPostPreprocessor =
                     new TechnologyToolboxBlogPostPreprocessor();
@@ -109,11 +114,12 @@ namespace BlogML2Hugo
 
                 var postUrl = new Uri(post.PostUrl);
 
-                var slug = blogUrlConverter.GetSlug(postUrl);
+                postConversionData.Slug = blogUrlConverter.GetSlug(postUrl);
 
                 // Organize blog posts by year/month/day
 
-                var subfolder = $"{post.DateCreated.ToLocalTime():yyyy-MM-dd}"
+                postConversionData.Subfolder =
+                    $"{post.DateCreated.ToLocalTime():yyyy-MM-dd}"
                     .Replace("-", "\\");
 
                 // Since the dates for blog posts have been updated -- for
@@ -126,20 +132,18 @@ namespace BlogML2Hugo
                 Uri url = new Uri(
                     string.Concat(
                         "https://www.technologytoolbox.com/blog/jjameson/archive/",
-                        subfolder.Replace("\\", "/"),
+                        postConversionData.Subfolder.Replace("\\", "/"),
                         "/",
-                        slug,
+                        postConversionData.Slug,
                         ".aspx"));
 
-                var postAliases = new List<string>();
-
-                postAliases.Add(postUrl.PathAndQuery);
+                postConversionData.Aliases.Add(postUrl.PathAndQuery);
 
                 if (post.PostUrl != url.AbsoluteUri)
                 {
                     post.PostUrl = url.AbsoluteUri;
 
-                    postAliases.Add(url.PathAndQuery);
+                    postConversionData.Aliases.Add(url.PathAndQuery);
                 }
 
                 linkMapper.Add(url);
@@ -163,18 +167,18 @@ namespace BlogML2Hugo
                 markdown = ReverseMarkdownHelper.DecodeAfterConversion(
                     markdown);
 
-                Console.WriteLine($"Writing {slug} ({post.Title})");
+                Console.WriteLine($"Writing {postConversionData.Slug} ({post.Title})");
 
-                var postDir = Path.Combine(outDir, subfolder);
+                var postDir = Path.Combine(outDir, postConversionData.Subfolder);
 
                 if (!Directory.Exists(postDir))
                 {
                     Directory.CreateDirectory(postDir);
                 }
 
-                var header = ComposeBlogHeader(post, categories, tags, postAliases);
+                var header = ComposeBlogHeader(post, categories, postConversionData);
 
-                WriteConvertedMarkdown(postDir, slug, header, markdown);
+                WriteConvertedMarkdown(postDir, postConversionData.Slug, header, markdown);
 
                 convertedPostCount++;
             });
@@ -207,8 +211,7 @@ namespace BlogML2Hugo
         static string ComposeBlogHeader(
             BlogMLPost post,
             Dictionary<string, CategoryRef> categories,
-            IEnumerable<string> tags,
-            List<string> postAliases)
+            PostConversionData postConversionData)
         {
             var header = new StringBuilder("---");
             header.AppendLine();
@@ -232,7 +235,7 @@ namespace BlogML2Hugo
                 header.AppendLine($"excerpt: \"{escapedExcerpt}\"");
             }
 
-            var joinedAliases = "\"" + string.Join("\", \"", postAliases) + "\"";
+            var joinedAliases = "\"" + string.Join("\", \"", postConversionData.Aliases) + "\"";
 
             header.Append($"aliases: [");
             header.Append(joinedAliases);
@@ -257,7 +260,7 @@ namespace BlogML2Hugo
 
             header.Append($"tags: [");
 
-            var joinedTags = "\"" + string.Join("\", \"", tags) + "\"";
+            var joinedTags = "\"" + string.Join("\", \"", postConversionData.Tags) + "\"";
 
             header.Append(joinedTags);
             header.AppendLine("]");
