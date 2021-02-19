@@ -93,7 +93,7 @@ namespace BlogML2Hugo
 
             blog.Posts.ForEach(post =>
             {
-                var postConversionData = new PostConversionData();
+                var postConversionData = new PostConversionData(post);
 
                 // Extract tags *before* preprocessing blog post (for example,
                 // to allow the preprocessor to remove tags embedded in the
@@ -107,10 +107,10 @@ namespace BlogML2Hugo
                     postConversionData.Tags.Add(tag);
                 });
 
-                IBlogPostPreprocessor blogPostPreprocessor =
+                IPostConversionStep blogPostPreprocessor =
                     new TechnologyToolboxBlogPostPreprocessor();
 
-                blogPostPreprocessor.Process(post);
+                blogPostPreprocessor.Execute(postConversionData);
 
                 var postUrl = new Uri(post.PostUrl);
 

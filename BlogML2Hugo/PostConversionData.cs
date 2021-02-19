@@ -1,10 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using BlogML.Xml;
+using System;
+using System.Collections.Generic;
 
 namespace BlogML2Hugo
 {
     public class PostConversionData
     {
+        private readonly BlogMLPost _post;
+
         public List<string> Aliases { get; private set; }
+
+        public BlogMLPost Post { get { return _post; } }
 
         public string Slug { get; set; }
 
@@ -12,8 +18,15 @@ namespace BlogML2Hugo
 
         public List<string> Tags { get; private set; }
 
-        public PostConversionData()
+        public PostConversionData(BlogMLPost post)
         {
+            if (post == null)
+            {
+                throw new ArgumentNullException("post");
+            }
+
+            _post = post;
+
             Aliases = new List<string>();
             Tags = new List<string>();
         }

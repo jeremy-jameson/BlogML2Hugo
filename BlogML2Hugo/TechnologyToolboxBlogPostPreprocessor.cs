@@ -5,10 +5,12 @@ using System;
 
 namespace BlogML2Hugo
 {
-    public class TechnologyToolboxBlogPostPreprocessor : IBlogPostPreprocessor
+    public class TechnologyToolboxBlogPostPreprocessor : IPostConversionStep
     {
-        public void Process(BlogMLPost post)
+        public void Execute(PostConversionData postConversionData)
         {
+            var post = postConversionData.Post;
+
             FixTechnologyToolboxBlogPostDates(post);
 
             var postHtml = post.Content.UncodedText;
