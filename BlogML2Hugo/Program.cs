@@ -764,13 +764,25 @@ namespace BlogML2Hugo
             //
             // with:
             //
-            //   <p><strong>My Table</strong></p>
+            //   <div>{{< table class="small" caption="My Table" >}}</div>
             //   <table>
             //       ...
             //   </table>
+            //   <div>{{< /table >}}</div>
             //
-            // This is used to avoid issues where <caption> elements are passed
-            // through when converting from HTML to Markdown
+            // The custom "table" Hugo shortcode is needed for the following
+            // reasons:
+            //
+            // - Avoid issues where <caption> elements are passed through when
+            //   converting from HTML to Markdown
+            //
+            // - Bootstrap expects <table> elements to have class="table"
+            //   attribute
+            //
+            // - Technology Toolbox blog posts currently contain a number of
+            //   tables with many columns -- so to render them within reasonably
+            //   wide tables with Bootstrap formatting, the "small" CSS rule
+            //   should be applied to all content in the tables
 
             var elements = doc.DocumentNode.SelectNodes("//table");
 
@@ -780,24 +792,60 @@ namespace BlogML2Hugo
                 {
                     var table = element;
 
+                    string caption = null;
+
                     var captionElement = table.SelectSingleNode(
                         "descendant::caption");
 
                     if (captionElement != null)
                     {
-                        // Change the <caption> element to <p> and move it before
-                        // the <table> element
+                        // TODO: Try to preserve links in captions
+                        //
+                        // e.g. "Table 4" in
+                        // https://www.technologytoolbox.com/blog/jjameson/archive/2009/11/02/analyzing-my-msdn-blog.aspx
+                        //
+                        // Currently, this causes errors when building the site
+                        // in Hugo due to quotes being added around the link URL
+                        //
+                        //caption = captionElement.InnerHtml.Trim();
 
-                        captionElement.Name = "p";
+                        caption = captionElement.InnerText.Trim();
+
                         captionElement.Remove();
-
-                        table.ParentNode.InsertBefore(
-                            captionElement,
-                            table);
-
-                        captionElement.InnerHtml = "<strong>" +
-                            captionElement.InnerHtml.Trim() + "</strong>";
                     }
+
+                    // Insert <div> containing Hugo shortcode
+                    // "{{< table ... >}}" before the <table> element
+
+                    var shortcodeBuilder = new HugoShortcodeNodeBuilder();
+
+                    shortcodeBuilder
+                        .ForHtmlDocument(element.OwnerDocument)
+                        .WithHtmlNodeName("div")
+                        .WithName("table")
+                        .WithParameter("class", "small");
+
+                    if (string.IsNullOrWhiteSpace(caption) == false)
+                    {
+                        shortcodeBuilder.WithParameter("caption", caption);
+                    }
+
+                    var shortcodeNode =shortcodeBuilder.Build();
+
+                    element.ParentNode.InsertBefore(shortcodeNode, element);
+
+                    // Insert <div> containing Hugo shortcode
+                    // "{{< /table >}}" after the <table> element
+
+                    shortcodeBuilder = new HugoShortcodeNodeBuilder();
+
+                    shortcodeNode = shortcodeBuilder
+                        .ForHtmlDocument(element.OwnerDocument)
+                        .WithHtmlNodeName("div")
+                        .WithName("/table")
+                        .Build();
+
+                    element.ParentNode.InsertAfter(shortcodeNode, element);
                 }
             }
         }
