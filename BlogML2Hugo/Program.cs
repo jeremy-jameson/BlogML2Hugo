@@ -132,7 +132,10 @@ namespace BlogML2Hugo
 
                 linkMapper.Add(url);
 
-                var tags = GetTags(blogDoc, post.ID);
+                IBlogPostTagExtractor blogPostTagExtractor =
+                    new BlogPostTagExtractor(blogDoc);
+
+                var tags = blogPostTagExtractor.GetTags(post);
 
                 var postHtml = post.Content.UncodedText;
 
@@ -141,7 +144,7 @@ namespace BlogML2Hugo
 
                 ProcessTechnologyToolboxBlogPost(htmlDoc, linkMapper);
 
-                if (tags.Count == 0)
+                if (tags.Any() == false)
                 {
                     tags = GetTagsFromPostContent(htmlDoc);
                     RemoveTagsFromPostContent(htmlDoc);
@@ -346,26 +349,6 @@ namespace BlogML2Hugo
             list.Add("W");
 
             return list;
-        }
-
-        static List<string> GetTags(XmlDocument blogMLDoc, string postId)
-        {
-
-            var tags = new List<string>();
-            var root = blogMLDoc.DocumentElement;
-            var mgr = new XmlNamespaceManager(blogMLDoc.NameTable);
-            mgr.AddNamespace("xs", "http://www.w3.org/2001/XMLSchema");
-            mgr.AddNamespace("blogml", "http://www.blogml.com/2006/09/BlogML");
-
-
-            var tagList = root.SelectNodes($"//blogml:post[@id='{postId}']/blogml:tags/blogml:tag", mgr);
-
-            foreach (XmlNode tag in tagList)
-            {
-                tags.Add(tag.Attributes["ref"].InnerText);
-            }
-
-            return tags;
         }
 
         private static List<string> GetTagsFromPostContent(HtmlDocument doc)
