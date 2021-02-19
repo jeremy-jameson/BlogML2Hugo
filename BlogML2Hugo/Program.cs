@@ -139,7 +139,7 @@ namespace BlogML2Hugo
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(postHtml);
 
-                MassageTechnologyToolboxBlogPost(htmlDoc, linkMapper);
+                ProcessTechnologyToolboxBlogPost(htmlDoc, linkMapper);
 
                 if (tags.Count == 0)
                 {
@@ -440,32 +440,32 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void MassageTechnologyToolboxBlogPost(
+        private static void ProcessTechnologyToolboxBlogPost(
             HtmlDocument doc,
             LinkMapper linkMapper)
         {
             FixSpacesInsideEmphasisElements(doc);
-            MassageTechnologyToolboxBlogCallouts(doc);
+            ProcessTechnologyToolboxBlogCallouts(doc);
 
-            MassageTechnologyToolboxBlogKbdContentInsideConsoleBlocks(doc);
+            ProcessTechnologyToolboxBlogKbdContentInsideConsoleBlocks(doc);
 
-            MassageTechnologyToolboxBlogConsoleBlocks(doc);
+            ProcessTechnologyToolboxBlogConsoleBlocks(doc);
             ReplaceTechnologyToolboxBlogKbdElements(doc);
-            MassageTechnologyToolboxBlogLinks(doc, linkMapper);
-            MassageTechnologyToolboxBlogTableCells(doc);
-            MassageTechnologyToolboxBlogTables(doc);
+            ProcessTechnologyToolboxBlogLinks(doc, linkMapper);
+            ProcessTechnologyToolboxBlogTableCells(doc);
+            ProcessTechnologyToolboxBlogTables(doc);
             ReplaceTechnologyToolboxBlogImages(doc);
             ReplaceTechnologyToolboxBlogReferences(doc);
             ReplaceTechnologyToolboxBlogSampElements(doc);
         }
 
-        private static void MassageTechnologyToolboxBlogCallouts(HtmlDocument doc)
+        private static void ProcessTechnologyToolboxBlogCallouts(HtmlDocument doc)
         {
-            MassageTechnologyToolboxBlogDirectQuotes(doc);
-            MassageTechnologyToolboxBlogNotes(doc);
+            ProcessTechnologyToolboxBlogDirectQuotes(doc);
+            ProcessTechnologyToolboxBlogNotes(doc);
         }
 
-        private static void MassageTechnologyToolboxBlogDirectQuotes(HtmlDocument doc)
+        private static void ProcessTechnologyToolboxBlogDirectQuotes(HtmlDocument doc)
         {
             // Replaces blog post content similar to the following:
             //
@@ -538,7 +538,7 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void MassageTechnologyToolboxBlogNotes(HtmlDocument doc)
+        private static void ProcessTechnologyToolboxBlogNotes(HtmlDocument doc)
         {
             // Replaces blog post content similar to the following:
             //
@@ -593,7 +593,7 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void MassageTechnologyToolboxBlogConsoleBlocks(HtmlDocument doc)
+        private static void ProcessTechnologyToolboxBlogConsoleBlocks(HtmlDocument doc)
         {
             // Replaces blog post content similar to the following:
             //
@@ -665,7 +665,7 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void MassageTechnologyToolboxBlogKbdContentInsideConsoleBlocks(HtmlDocument doc)
+        private static void ProcessTechnologyToolboxBlogKbdContentInsideConsoleBlocks(HtmlDocument doc)
         {
             // Replaces blog post content similar to the following:
             //
@@ -727,7 +727,7 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void MassageTechnologyToolboxBlogLinks(
+        private static void ProcessTechnologyToolboxBlogLinks(
             HtmlDocument doc,
             LinkMapper linkMapper)
         {
@@ -754,7 +754,7 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void MassageTechnologyToolboxBlogTables(HtmlDocument doc)
+        private static void ProcessTechnologyToolboxBlogTables(HtmlDocument doc)
         {
             // Replaces blog post content similar to the following:
             //
@@ -851,7 +851,7 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void MassageTechnologyToolboxBlogTableCells(HtmlDocument doc)
+        private static void ProcessTechnologyToolboxBlogTableCells(HtmlDocument doc)
         {
             // Normalize whitespace in "simple" <td> content to fix a number of
             // issues during the Markdown process
