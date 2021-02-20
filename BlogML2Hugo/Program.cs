@@ -84,6 +84,11 @@ namespace BlogML2Hugo
             {
                 var postConversionData = new PostConversionData(post, outDir);
 
+                IPostConversionStep slugDeterminationStep =
+                    new SlugDeterminationStep(blogUrlConverter);
+
+                slugDeterminationStep.Execute(postConversionData);
+
                 // Extract tags *before* preprocessing blog post (for example,
                 // to allow the preprocessor to remove tags embedded in the
                 // content of the post)

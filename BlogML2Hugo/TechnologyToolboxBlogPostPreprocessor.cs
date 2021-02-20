@@ -50,8 +50,6 @@ namespace BlogML2Hugo
 
             var postUrl = new Uri(post.PostUrl);
 
-            postConversionData.Slug = _linkMapper.GetSlug(postUrl);
-
             // Organize blog posts by year/month/day
 
             postConversionData.Subfolder =
