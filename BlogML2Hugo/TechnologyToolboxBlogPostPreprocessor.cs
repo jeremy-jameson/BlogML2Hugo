@@ -147,6 +147,7 @@ namespace BlogML2Hugo
 
             ProcessBlogConsoleBlocks(doc);
             ProcessBlogLineThroughContent(doc);
+            ProcessBlogLogExcerpts(doc);
             ReplaceBlogKbdElements(doc);
             ProcessBlogLinks(doc, linkMapper);
             ProcessBlogTableCells(doc);
@@ -231,6 +232,128 @@ namespace BlogML2Hugo
                     // Change <blockquote> to <div> so the content is converted
                     // to plain text in the Markdown
                     blockquote.Name = "div";
+                }
+            }
+        }
+
+        private static void ProcessBlogLogExcerpts(HtmlDocument doc)
+        {
+            // Replaces blog post content similar to the following:
+            //
+            //   <div class="logExcerpt">
+            //     Lorem ipsum dolor sit amet<br />
+            //     consectetur adipiscing elit...
+            //   </div>
+            //
+            // with:
+            //
+            //   <p>{{< log-excerpt >}}</p>
+            //   <div class="logExcerpt"><p> Lorem ipsum dolor sit amet\<br /> consectetur adipiscing elit... </p>
+            //   </div>
+            //   <p>{{< /log-excerpt >}}</p>
+
+            var elements = doc.DocumentNode.SelectNodes(
+                "//div[contains(@class, 'logExcerpt')]");
+
+            if (elements != null)
+            {
+                foreach (var element in elements)
+                {
+                    bool hasParagraphContent = element.Descendants("p").Any();
+                    bool hasPreformattedContent = element.Descendants("pre").Any();
+
+                    if (hasParagraphContent == false
+                        && hasPreformattedContent == false)
+                    {
+                        // Note that <div> elements containing only text and
+                        // HTML line breaks -- or more specifically no <p> or
+                        // <pre> elements -- are not correctly converted to
+                        // Markdown because the combination of HTML line breaks
+                        // and "insignificant whitespace" (e.g. "\r\n\t") cause
+                        // multiple paragraphs to be produced in the Markdown.
+                        //
+                        // To prevent this, wrap the content in a new <p>
+                        // element, add Markdown line breaks before the HTML
+                        // line breaks, and normalize whitespace in the #text
+                        // elements.
+
+                        var newElement = doc.CreateElement("p");
+
+                        element.ChildNodes.ToList().ForEach(childNode =>
+                        {
+                            if (childNode.Name == "#text"
+                                && childNode.NextSibling != null
+                                && childNode.NextSibling.Name == "br")
+                            {
+                                var lineBreakNode = childNode.NextSibling;
+
+                                if (lineBreakNode.NextSibling != null
+                                    && lineBreakNode.NextSibling.Name == "#text")
+                                {
+                                    // Normalize whitespace in text following HTML
+                                    // line break to ensure the content is treated
+                                    // as a single paragraph when subsequently
+                                    // converted to Markdown
+
+                                    var textNodeFollowingLineBreakNode =
+                                        lineBreakNode.NextSibling;
+
+                                    textNodeFollowingLineBreakNode.InnerHtml =
+                                        HtmlDocumentHelper.NormalizeWhitespace(
+                                            textNodeFollowingLineBreakNode.InnerHtml);
+                                }
+
+                                // Normalize whitespace in text and add backslash
+                                // before HTML line break so that subsequent
+                                // conversion to Markdown is formatted as expected
+                                childNode.InnerHtml =
+                                    HtmlDocumentHelper.NormalizeWhitespace(
+                                        childNode.InnerHtml) + "\\";
+                            }
+
+                            childNode.Remove();
+
+                            newElement.AppendChild(childNode);
+                        });
+
+                        element.AppendChild(newElement);
+                    }
+
+                    // Insert paragraph containing Hugo shortcode
+                    // "{{< log-excerpt >}}" before the
+                    // <div class="logExcerpt"> element
+
+                    var shortcodeBuilder = new HugoShortcodeNodeBuilder();
+
+                    var shortcodeNode = shortcodeBuilder
+                        .ForHtmlDocument(element.OwnerDocument)
+                        .WithHtmlNodeName("div")
+                        .WithName("log-excerpt")
+                        .Build();
+
+                    var paragraph = element.OwnerDocument.CreateElement("p");
+
+                    paragraph.ChildNodes.Add(shortcodeNode);
+
+                    element.ParentNode.InsertBefore(paragraph, element);
+
+                    // Insert paragraph containing Hugo shortcode
+                    // "{{< /log-excerpt >}}" after the
+                    // <div class="logExcerpt"> element
+
+                    shortcodeBuilder = new HugoShortcodeNodeBuilder();
+
+                    shortcodeNode = shortcodeBuilder
+                        .ForHtmlDocument(element.OwnerDocument)
+                        .WithHtmlNodeName("div")
+                        .WithName("/log-excerpt")
+                        .Build();
+
+                    paragraph = element.OwnerDocument.CreateElement("p");
+
+                    paragraph.ChildNodes.Add(shortcodeNode);
+
+                    element.ParentNode.InsertAfter(paragraph, element);
                 }
             }
         }
