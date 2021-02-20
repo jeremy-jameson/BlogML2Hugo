@@ -1,5 +1,4 @@
 ﻿using HtmlAgilityPack;
-using System;
 using System.Diagnostics;
 using System.Linq;
 
@@ -11,8 +10,9 @@ namespace BlogML2Hugo
             string html)
         {
             var normalizedText = html
-                .Replace(Environment.NewLine, " ")
-                .Replace("\t", " ");
+                .Replace('\r', ' ')
+                .Replace('\n', ' ')
+                .Replace('\t', ' ');
 
             while (normalizedText.IndexOf("  ") != -1)
             {
