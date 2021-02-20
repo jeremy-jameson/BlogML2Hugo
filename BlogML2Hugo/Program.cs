@@ -76,6 +76,8 @@ namespace BlogML2Hugo
             IBlogUrlConverter blogUrlConverter =
                 new TechnologyToolboxBlogUrlConverter();
 
+            var imageUrlMapper = new TechnologyToolboxImageUrlMapper();
+
             var linkMapper = new LinkMapper(blogUrlConverter);
 
             blog.Posts.ForEach(post =>
@@ -92,7 +94,8 @@ namespace BlogML2Hugo
                 blogPostTagExtractor.Execute(postConversionData);
 
                 IPostConversionStep blogPostPreprocessor =
-                    new TechnologyToolboxBlogPostPreprocessor(linkMapper);
+                    new TechnologyToolboxBlogPostPreprocessor(
+                        imageUrlMapper, linkMapper);
 
                 blogPostPreprocessor.Execute(postConversionData);
 
