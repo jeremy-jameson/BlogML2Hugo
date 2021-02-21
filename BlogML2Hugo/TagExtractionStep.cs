@@ -3,11 +3,11 @@ using System.Xml;
 
 namespace BlogML2Hugo
 {
-    class BlogPostTagExtractor : IBlogPostConversionStep
+    class TagExtractionStep : IBlogPostConversionStep
     {
         private readonly XmlDocument _blogMLDoc;
 
-        public BlogPostTagExtractor(XmlDocument blogMLDoc)
+        public TagExtractionStep(XmlDocument blogMLDoc)
         {
             if (blogMLDoc == null)
             {

@@ -5,7 +5,7 @@ using System.Xml;
 
 namespace BlogML2Hugo
 {
-    class TechnologyToolboxBlogPostTagExtractor : BlogPostTagExtractor
+    class TechnologyToolboxBlogPostTagExtractor : TagExtractionStep
     {
         public TechnologyToolboxBlogPostTagExtractor(XmlDocument blogMLDoc) :
             base(blogMLDoc)
