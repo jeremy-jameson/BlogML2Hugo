@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>TechnologyToolbox.SubtextToHugoBlogConversion</AssemblyName>
+    <RootNamespace>TechnologyToolbox.SubtextToHugoBlogConversion</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\BlogML2Hugo.Core.csproj" />
+  </ItemGroup>
+
+</Project>

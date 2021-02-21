@@ -9,4 +9,8 @@
     <PackageReference Include="Markdig" Version="0.23.0" />
     <PackageReference Include="ReverseMarkdown" Version="3.18.0" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Core\BlogML2Hugo.Core.csproj" />
+    <ProjectReference Include="..\TechnologyToolbox\SubtextToHugoBlogConversion\TechnologyToolbox.SubtextToHugoBlogConversion.csproj" />
+  </ItemGroup>
 </Project>

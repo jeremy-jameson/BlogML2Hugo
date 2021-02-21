@@ -1,7 +1,8 @@
-﻿using System;
+﻿using BlogML2Hugo.Core;
+using System;
 using System.Collections.Generic;
 
-namespace BlogML2Hugo
+namespace TechnologyToolbox.SubtextToHugoBlogConversion
 {
     public class TechnologyToolboxImageUrlMapper : IUrlMapper
     {

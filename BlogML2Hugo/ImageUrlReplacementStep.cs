@@ -1,5 +1,6 @@
 ﻿using BlogML;
 using BlogML.Xml;
+using BlogML2Hugo.Core;
 using HtmlAgilityPack;
 using System;
 
