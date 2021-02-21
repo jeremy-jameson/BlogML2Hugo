@@ -17,7 +17,7 @@ namespace BlogML2Hugo
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(postHtml);
 
-            FixSpacesInsideEmphasisElements(htmlDoc);
+            FixSpacesInEmphasisElements(htmlDoc);
 
             ProcessBlogTableCells(htmlDoc);
 
@@ -26,7 +26,7 @@ namespace BlogML2Hugo
                 ContentTypes.Html);
         }
 
-        private static void FixSpacesInsideEmphasisElements(HtmlDocument doc)
+        private static void FixSpacesInEmphasisElements(HtmlDocument doc)
         {
             // Replaces HTML content similar to the following:
             //
@@ -36,24 +36,24 @@ namespace BlogML2Hugo
             //
             //   ...click the <b>Advanced</b> button...
 
-            FixSpacesInsideEmphasisElements(
+            FixSpacesInEmphasisElements(
                 doc,
                 "//b[text() != normalize-space()]");
 
-            FixSpacesInsideEmphasisElements(
+            FixSpacesInEmphasisElements(
                 doc,
                 "//em[text() != normalize-space()]");
 
-            FixSpacesInsideEmphasisElements(
+            FixSpacesInEmphasisElements(
                 doc,
                 "//i[text() != normalize-space()]");
 
-            FixSpacesInsideEmphasisElements(
+            FixSpacesInEmphasisElements(
                 doc,
                 "//strong[text() != normalize-space()]");
         }
 
-        private static void FixSpacesInsideEmphasisElements(
+        private static void FixSpacesInEmphasisElements(
             HtmlDocument doc,
             string xpath)
         {
@@ -61,11 +61,11 @@ namespace BlogML2Hugo
 
             if (nodes != null)
             {
-                FixSpacesInsideEmphasisElements(nodes);
+                FixSpacesInEmphasisElements(nodes);
             }
         }
 
-        private static void FixSpacesInsideEmphasisElements(
+        private static void FixSpacesInEmphasisElements(
             HtmlNodeCollection nodes)
         {
             // Replaces HTML content similar to the following:
