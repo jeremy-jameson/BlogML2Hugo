@@ -54,10 +54,6 @@ namespace BlogML2Hugo.Core
                 .Replace("&quot;", "\\&quot;")
                 .Trim();
 
-            encodedParameterValue =
-                ReverseMarkdownHelper.EncodeBeforeConversion(
-                    encodedParameterValue);
-
             if (string.IsNullOrWhiteSpace(parameterName) == false)
             {
                 sb.Append($" {parameterName}=\"{encodedParameterValue}\"");

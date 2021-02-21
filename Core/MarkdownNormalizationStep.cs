@@ -10,9 +10,6 @@ namespace BlogML2Hugo.Core
         {
             var markdown = postConversionData.Post.Content.UncodedText;
 
-            markdown = ReverseMarkdownHelper.DecodeAfterConversion(
-                markdown);
-
             markdown = Markdown.Normalize(markdown);
 
             markdown = RemoveTrailingSpacesFromEmptyBlockquoteLines(
