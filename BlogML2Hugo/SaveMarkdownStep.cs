@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BlogML2Hugo
 {
-    public class SaveMarkdownStep : IPostConversionStep
+    public class SaveMarkdownStep : IBlogPostConversionStep
     {
         public void Execute(PostConversionData postConversionData)
         {

@@ -3,7 +3,7 @@ using System.Xml;
 
 namespace BlogML2Hugo
 {
-    class BlogPostTagExtractor : IPostConversionStep
+    class BlogPostTagExtractor : IBlogPostConversionStep
     {
         private readonly XmlDocument _blogMLDoc;
 

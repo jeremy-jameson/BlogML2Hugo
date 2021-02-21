@@ -2,7 +2,7 @@
 
 namespace BlogML2Hugo
 {
-    public class SlugDeterminationStep : IPostConversionStep
+    public class SlugDeterminationStep : IBlogPostConversionStep
     {
         private readonly IBlogUrlConverter _blogUrlConverter;
 

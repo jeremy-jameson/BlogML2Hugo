@@ -2,7 +2,7 @@
 
 namespace BlogML2Hugo
 {
-    public class MarkdownNormalizationStep : IPostConversionStep
+    public class MarkdownNormalizationStep : IBlogPostConversionStep
     {
         public void Execute(PostConversionData postConversionData)
         {

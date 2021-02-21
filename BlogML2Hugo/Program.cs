@@ -84,7 +84,7 @@ namespace BlogML2Hugo
             {
                 var postConversionData = new PostConversionData(post, outDir);
 
-                IPostConversionStep slugDeterminationStep =
+                IBlogPostConversionStep slugDeterminationStep =
                     new SlugDeterminationStep(blogUrlConverter);
 
                 slugDeterminationStep.Execute(postConversionData);
@@ -93,28 +93,28 @@ namespace BlogML2Hugo
                 // to allow the preprocessor to remove tags embedded in the
                 // content of the post)
 
-                IPostConversionStep blogPostTagExtractor =
+                IBlogPostConversionStep blogPostTagExtractor =
                     new TechnologyToolboxBlogPostTagExtractor(blogDoc);
 
                 blogPostTagExtractor.Execute(postConversionData);
 
-                IPostConversionStep blogPostPreprocessor =
+                IBlogPostConversionStep blogPostPreprocessor =
                     new TechnologyToolboxBlogPostPreprocessor(
                         imageUrlMapper, linkMapper);
 
                 blogPostPreprocessor.Execute(postConversionData);
 
-                IPostConversionStep markdownConversionStep =
+                IBlogPostConversionStep markdownConversionStep =
                     new MarkdownConversionStep();
 
                 markdownConversionStep.Execute(postConversionData);
 
-                IPostConversionStep markdownNormalizationStep =
+                IBlogPostConversionStep markdownNormalizationStep =
                     new MarkdownNormalizationStep();
 
                 markdownNormalizationStep.Execute(postConversionData);
 
-                IPostConversionStep categoryLookupStep =
+                IBlogPostConversionStep categoryLookupStep =
                     new CategoryLookupStep(categories);
 
                 categoryLookupStep.Execute(postConversionData);
@@ -123,7 +123,7 @@ namespace BlogML2Hugo
 
                 var postDir = Path.Combine(outDir, postConversionData.Subfolder);
 
-                IPostConversionStep saveMarkdownStep =
+                IBlogPostConversionStep saveMarkdownStep =
                     new SaveMarkdownStep();
 
                 saveMarkdownStep.Execute(postConversionData);

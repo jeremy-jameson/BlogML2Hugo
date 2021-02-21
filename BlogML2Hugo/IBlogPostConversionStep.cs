@@ -1,6 +1,6 @@
 ﻿namespace BlogML2Hugo
 {
-    public interface IPostConversionStep
+    public interface IBlogPostConversionStep
     {
         void Execute(PostConversionData postConversionData);
     }

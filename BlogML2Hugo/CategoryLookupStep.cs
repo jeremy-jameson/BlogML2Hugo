@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace BlogML2Hugo
 {
-    public class CategoryLookupStep : IPostConversionStep
+    public class CategoryLookupStep : IBlogPostConversionStep
     {
         private readonly Dictionary<string, CategoryRef> _categories;
 

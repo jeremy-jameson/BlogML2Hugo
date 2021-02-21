@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace BlogML2Hugo
 {
-    public class TechnologyToolboxBlogPostPreprocessor : IPostConversionStep
+    public class TechnologyToolboxBlogPostPreprocessor : IBlogPostConversionStep
     {
         private readonly IUrlMapper _imageUrlMapper;
         private readonly LinkMapper _linkMapper;
