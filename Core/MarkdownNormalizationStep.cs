@@ -8,13 +8,14 @@ namespace BlogML2Hugo.Core
     {
         public void Execute(BlogPostConversionData postConversionData)
         {
-            var markdown = Markdown.Normalize(
-                postConversionData.Post.Content.UncodedText);
-
-            markdown = RemoveTrailingSpacesFromEmptyBlockquoteLines(
-                markdown);
+            var markdown = postConversionData.Post.Content.UncodedText;
 
             markdown = ReverseMarkdownHelper.DecodeAfterConversion(
+                markdown);
+
+            markdown = Markdown.Normalize(markdown);
+
+            markdown = RemoveTrailingSpacesFromEmptyBlockquoteLines(
                 markdown);
 
             postConversionData.Post.Content = BlogMLContent.Create(
