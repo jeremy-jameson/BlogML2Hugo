@@ -119,8 +119,6 @@ namespace BlogML2Hugo
 
                 categoryLookupStep.Execute(postConversionData);
 
-                Console.WriteLine($"Writing {postConversionData.Slug} ({post.Title})");
-
                 IBlogPostConversionStep saveMarkdownStep =
                     new SaveMarkdownStep();
 
