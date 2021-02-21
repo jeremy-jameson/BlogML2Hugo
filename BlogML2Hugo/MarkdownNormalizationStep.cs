@@ -1,4 +1,6 @@
-﻿using Markdig;
+﻿using BlogML;
+using BlogML.Xml;
+using Markdig;
 
 namespace BlogML2Hugo
 {
@@ -6,7 +8,8 @@ namespace BlogML2Hugo
     {
         public void Execute(BlogPostConversionData postConversionData)
         {
-            var markdown = Markdown.Normalize(postConversionData.Markdown);
+            var markdown = Markdown.Normalize(
+                postConversionData.Post.Content.UncodedText);
 
             markdown = RemoveTrailingSpacesFromEmptyBlockquoteLines(
                 markdown);
@@ -14,7 +17,9 @@ namespace BlogML2Hugo
             markdown = ReverseMarkdownHelper.DecodeAfterConversion(
                 markdown);
 
-            postConversionData.Markdown = markdown;
+            postConversionData.Post.Content = BlogMLContent.Create(
+                markdown,
+                ContentTypes.Text);
         }
 
         private static string RemoveTrailingSpacesFromEmptyBlockquoteLines(

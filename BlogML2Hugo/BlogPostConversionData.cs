@@ -13,8 +13,6 @@ namespace BlogML2Hugo
 
         public List<string> Categories { get; private set; }
 
-        public string Markdown { get; set; }
-
         public string OutputDirectory { get { return _outputDirectory; } }
 
         public BlogMLPost Post { get { return _post; } }

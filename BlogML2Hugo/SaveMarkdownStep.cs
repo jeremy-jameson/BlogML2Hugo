@@ -45,7 +45,10 @@ namespace BlogML2Hugo
 
                 writer.WriteLine();
 
-                writer.WriteLine(postConversionData.Markdown);
+                var markdown = postConversionData.Post.Content.UncodedText;
+
+                writer.WriteLine(markdown);
+
                 writer.WriteLine();
             }
         }

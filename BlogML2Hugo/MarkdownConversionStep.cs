@@ -1,4 +1,5 @@
-﻿using ReverseMarkdown;
+﻿using BlogML.Xml;
+using ReverseMarkdown;
 
 namespace BlogML2Hugo
 {
@@ -15,8 +16,12 @@ namespace BlogML2Hugo
 
             var mdConverter = new Converter(config);
 
-            postConversionData.Markdown = mdConverter.Convert(
+            var markdown = mdConverter.Convert(
                 post.Content.UncodedText);
+
+            postConversionData.Post.Content = BlogMLContent.Create(
+                markdown,
+                BlogML.ContentTypes.Text);
         }
     }
 }
