@@ -82,47 +82,23 @@ namespace BlogML2Hugo
 
             blog.Posts.ForEach(post =>
             {
-                var postConversionData = new BlogPostConversionData(post, outDir);
+                var pipeline = new BlogPostConversionPipelineBuilder()
+                    .ForPost(post)
+                    .WithOutputDirectory(outDir)
+                    .AddStep(new SlugDeterminationStep(blogUrlConverter))
+                    // Extract tags *before* preprocessing blog post (for example,
+                    // to allow the preprocessor to remove tags embedded in the
+                    // content of the post)
+                    .AddStep(new TechnologyToolboxTagExtractionStep(blogDoc))
+                    .AddStep(new TechnologyToolboxBlogPostPreprocessor(
+                        imageUrlMapper, linkMapper))
+                    .AddStep(new MarkdownConversionStep())
+                    .AddStep(new MarkdownNormalizationStep())
+                    .AddStep(new CategoryLookupStep(categories))
+                    .AddStep(new SaveMarkdownStep())
+                    .Build();
 
-                IBlogPostConversionStep slugDeterminationStep =
-                    new SlugDeterminationStep(blogUrlConverter);
-
-                slugDeterminationStep.Execute(postConversionData);
-
-                // Extract tags *before* preprocessing blog post (for example,
-                // to allow the preprocessor to remove tags embedded in the
-                // content of the post)
-
-                IBlogPostConversionStep blogPostTagExtractor =
-                    new TechnologyToolboxTagExtractionStep(blogDoc);
-
-                blogPostTagExtractor.Execute(postConversionData);
-
-                IBlogPostConversionStep blogPostPreprocessor =
-                    new TechnologyToolboxBlogPostPreprocessor(
-                        imageUrlMapper, linkMapper);
-
-                blogPostPreprocessor.Execute(postConversionData);
-
-                IBlogPostConversionStep markdownConversionStep =
-                    new MarkdownConversionStep();
-
-                markdownConversionStep.Execute(postConversionData);
-
-                IBlogPostConversionStep markdownNormalizationStep =
-                    new MarkdownNormalizationStep();
-
-                markdownNormalizationStep.Execute(postConversionData);
-
-                IBlogPostConversionStep categoryLookupStep =
-                    new CategoryLookupStep(categories);
-
-                categoryLookupStep.Execute(postConversionData);
-
-                IBlogPostConversionStep saveMarkdownStep =
-                    new SaveMarkdownStep();
-
-                saveMarkdownStep.Execute(postConversionData);
+                pipeline.Execute();
 
                 convertedPostCount++;
             });
