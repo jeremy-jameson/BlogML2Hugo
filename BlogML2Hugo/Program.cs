@@ -121,8 +121,6 @@ namespace BlogML2Hugo
 
                 Console.WriteLine($"Writing {postConversionData.Slug} ({post.Title})");
 
-                var postDir = Path.Combine(outDir, postConversionData.Subfolder);
-
                 IBlogPostConversionStep saveMarkdownStep =
                     new SaveMarkdownStep();
 
