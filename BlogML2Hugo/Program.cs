@@ -95,6 +95,7 @@ namespace BlogML2Hugo
                     // elements embedded in the content of the post with Hugo
                     // "figure" shortcodes)
                     .AddStep(new ImageUrlReplacementStep(imageUrlMapper))
+                    .AddStep(new FixHtmlFormattingIssuesStep())
                     .AddStep(new TechnologyToolboxBlogPostPreprocessor(
                         linkMapper))
                     .AddStep(new MarkdownConversionStep())
