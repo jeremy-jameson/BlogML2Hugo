@@ -86,12 +86,17 @@ namespace BlogML2Hugo
                     .ForPost(post)
                     .WithOutputDirectory(outDir)
                     .AddStep(new SlugDeterminationStep(blogUrlConverter))
-                    // Extract tags *before* preprocessing blog post (for example,
-                    // to allow the preprocessor to remove tags embedded in the
-                    // content of the post)
+                    // Extract tags *before* preprocessing blog post (for
+                    // example, to allow the preprocessing step to remove tags
+                    // embedded in the content of the post)
                     .AddStep(new TechnologyToolboxTagExtractionStep(blogDoc))
+                    // Replace image URLs *before* preprocessing blog post (for
+                    // example, to allow the preprocessing step to replace <img>
+                    // elements embedded in the content of the post with Hugo
+                    // "figure" shortcodes)
+                    .AddStep(new ImageUrlReplacementStep(imageUrlMapper))
                     .AddStep(new TechnologyToolboxBlogPostPreprocessor(
-                        imageUrlMapper, linkMapper))
+                        linkMapper))
                     .AddStep(new MarkdownConversionStep())
                     .AddStep(new MarkdownNormalizationStep())
                     .AddStep(new CategoryLookupStep(categories))

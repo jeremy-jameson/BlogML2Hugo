@@ -9,24 +9,16 @@ namespace BlogML2Hugo
 {
     public class TechnologyToolboxBlogPostPreprocessor : IBlogPostConversionStep
     {
-        private readonly IUrlMapper _imageUrlMapper;
         private readonly LinkMapper _linkMapper;
 
         public TechnologyToolboxBlogPostPreprocessor(
-            IUrlMapper imageUrlMapper,
             LinkMapper linkMapper)
         {
-            if (imageUrlMapper == null)
-            {
-                throw new ArgumentNullException("imageUrlMapper");
-            }
-
             if (linkMapper == null)
             {
                 throw new ArgumentNullException("linkMapper");
             }
 
-            _imageUrlMapper = imageUrlMapper;
             _linkMapper = linkMapper;
         }
 
@@ -145,8 +137,6 @@ namespace BlogML2Hugo
 
         private void ProcessBlogPost(HtmlDocument doc)
         {
-            ReplaceBlogImageUrls(doc);
-
             FixSpacesInsideEmphasisElements(doc);
             ProcessBlogCallouts(doc);
 
@@ -1055,55 +1045,6 @@ namespace BlogML2Hugo
                             captionDiv.Remove();
                         }
                     });
-                }
-            }
-        }
-
-        private void ReplaceBlogImageUrls(HtmlDocument doc)
-        {
-            var elements = doc.DocumentNode.SelectNodes("//img");
-
-            if (elements != null)
-            {
-                foreach (var element in elements)
-                {
-                    var imageSrc = element.GetAttributeValue("src", null);
-
-                    if (string.IsNullOrWhiteSpace(imageSrc) == false)
-                    {
-                        var originalUrl = new Uri(
-                            imageSrc,
-                            UriKind.RelativeOrAbsolute);
-
-                        if (_imageUrlMapper.IsMappedUrl(originalUrl) == true)
-                        {
-                            var mappedUrl = _imageUrlMapper.GetMappedUrl(originalUrl);
-
-                            element.Attributes["src"].Value = mappedUrl.AbsoluteUri;
-                        }
-                    }
-                }
-            }
-
-            elements = doc.DocumentNode.SelectNodes("//a");
-
-            if (elements != null)
-            {
-                foreach (var element in elements)
-                {
-                    var href = element.GetAttributeValue("href", null);
-
-                    if (string.IsNullOrWhiteSpace(href) == false)
-                    {
-                        var originalUrl = new Uri(href, UriKind.RelativeOrAbsolute);
-
-                        if (_imageUrlMapper.IsMappedUrl(originalUrl) == true)
-                        {
-                            var mappedUrl = _imageUrlMapper.GetMappedUrl(originalUrl);
-
-                            element.Attributes["href"].Value = mappedUrl.AbsoluteUri;
-                        }
-                    }
                 }
             }
         }
