@@ -19,7 +19,7 @@ namespace BlogML2Hugo
 
             FixSpacesInEmphasisElements(htmlDoc);
 
-            ProcessBlogTableCells(htmlDoc);
+            FixSpacesInTableCells(htmlDoc);
 
             post.Content = BlogMLContent.Create(
                 htmlDoc.DocumentNode.OuterHtml,
@@ -156,7 +156,7 @@ namespace BlogML2Hugo
             }
         }
 
-        private static void ProcessBlogTableCells(HtmlDocument doc)
+        private static void FixSpacesInTableCells(HtmlDocument doc)
         {
             // Normalize whitespace in "simple" <td> content to fix a number of
             // issues during the Markdown conversion process
