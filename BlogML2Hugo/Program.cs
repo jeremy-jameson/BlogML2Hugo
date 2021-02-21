@@ -94,7 +94,7 @@ namespace BlogML2Hugo
                 // content of the post)
 
                 IBlogPostConversionStep blogPostTagExtractor =
-                    new TechnologyToolboxBlogPostTagExtractor(blogDoc);
+                    new TechnologyToolboxTagExtractionStep(blogDoc);
 
                 blogPostTagExtractor.Execute(postConversionData);
 
