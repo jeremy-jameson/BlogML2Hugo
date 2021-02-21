@@ -1,11 +1,8 @@
 ﻿using BlogML;
 using BlogML.Xml;
 using HtmlAgilityPack;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 
 namespace BlogML2Hugo
 {
@@ -21,6 +18,8 @@ namespace BlogML2Hugo
             htmlDoc.LoadHtml(postHtml);
 
             FixSpacesInsideEmphasisElements(htmlDoc);
+
+            ProcessBlogTableCells(htmlDoc);
 
             post.Content = BlogMLContent.Create(
                 htmlDoc.DocumentNode.OuterHtml,
@@ -154,6 +153,37 @@ namespace BlogML2Hugo
                         }
                     }
                 });
+            }
+        }
+
+        private static void ProcessBlogTableCells(HtmlDocument doc)
+        {
+            // Normalize whitespace in "simple" <td> content to fix a number of
+            // issues during the Markdown conversion process
+            //
+            // For example, the line breaks in the last column of the table in
+            // the following blog post result in "corruption" when converting
+            // from HTML to Markdown:
+            //
+            // https://www.technologytoolbox.com/blog/jjameson/archive/2012/02/19/html-to-pdf-converters.aspx
+
+            var elements = doc.DocumentNode.SelectNodes("//td");
+
+            if (elements != null)
+            {
+                foreach (var element in elements)
+                {
+                    // Ignore table cells containing HTML line breaks and other
+                    // "block" content (e.g. lists)
+
+                    if (element.Descendants("br").Any() == false
+                        && element.Descendants("ol").Any() == false
+                        && element.Descendants("ul").Any() == false)
+                    {
+                        HtmlDocumentHelper.NormalizeWhitespaceInChildTextNodes(
+                            element);
+                    }
+                }
             }
         }
     }
