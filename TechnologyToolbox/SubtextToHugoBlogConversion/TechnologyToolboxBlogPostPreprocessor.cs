@@ -1,11 +1,12 @@
 ﻿using BlogML;
 using BlogML.Xml;
+using BlogML2Hugo.Core;
 using HtmlAgilityPack;
 using System;
 using System.Diagnostics;
 using System.Linq;
 
-namespace BlogML2Hugo
+namespace TechnologyToolbox.SubtextToHugoBlogConversion
 {
     public class TechnologyToolboxBlogPostPreprocessor : IBlogPostConversionStep
     {

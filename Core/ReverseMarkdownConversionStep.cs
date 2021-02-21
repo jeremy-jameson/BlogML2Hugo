@@ -1,15 +1,20 @@
 ﻿using BlogML.Xml;
-using Html2Markdown;
+using ReverseMarkdown;
 
-namespace BlogML2Hugo
+namespace BlogML2Hugo.Core
 {
-    public class Html2MarkdownConversionStep : IBlogPostConversionStep
+    public class ReverseMarkdownConversionStep : IBlogPostConversionStep
     {
         public void Execute(BlogPostConversionData postConversionData)
         {
             var post = postConversionData.Post;
 
-            var mdConverter = new Converter();
+            var config = new ReverseMarkdown.Config
+            {
+                GithubFlavored = true,
+            };
+
+            var mdConverter = new Converter(config);
 
             var markdown = mdConverter.Convert(
                 post.Content.UncodedText);

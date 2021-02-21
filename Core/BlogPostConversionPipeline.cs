@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BlogML2Hugo
+namespace BlogML2Hugo.Core
 {
     public class BlogPostConversionPipeline
     {

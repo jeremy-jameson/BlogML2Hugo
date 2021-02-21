@@ -1,7 +1,7 @@
 ﻿using HtmlAgilityPack;
 using System;
 
-namespace BlogML2Hugo
+namespace BlogML2Hugo.Core
 {
     public class HugoShortcodeNodeBuilder
     {

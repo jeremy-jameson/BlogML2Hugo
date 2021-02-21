@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using BlogML.Xml;
+using BlogML2Hugo.Core;
 using TechnologyToolbox.SubtextToHugoBlogConversion;
 
 namespace BlogML2Hugo

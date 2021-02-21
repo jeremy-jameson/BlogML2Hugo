@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace BlogML2Hugo
+namespace BlogML2Hugo.Core
 {
     public class SaveMarkdownStep : IBlogPostConversionStep
     {

@@ -2,7 +2,7 @@
 using BlogML.Xml;
 using Markdig;
 
-namespace BlogML2Hugo
+namespace BlogML2Hugo.Core
 {
     public class MarkdownNormalizationStep : IBlogPostConversionStep
     {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BlogML2Hugo
+namespace BlogML2Hugo.Core
 {
     /// <summary>
     /// This class is used to preserve underscores in Hugo shortcode parameters.

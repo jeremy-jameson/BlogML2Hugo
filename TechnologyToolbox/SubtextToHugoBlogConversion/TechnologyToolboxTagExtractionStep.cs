@@ -1,11 +1,12 @@
-﻿using HtmlAgilityPack;
+﻿using BlogML2Hugo.Core;
+using HtmlAgilityPack;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 
-namespace BlogML2Hugo
+namespace TechnologyToolbox.SubtextToHugoBlogConversion
 {
-    class TechnologyToolboxTagExtractionStep : TagExtractionStep
+    public class TechnologyToolboxTagExtractionStep : TagExtractionStep
     {
         public TechnologyToolboxTagExtractionStep(XmlDocument blogMLDoc) :
             base(blogMLDoc)

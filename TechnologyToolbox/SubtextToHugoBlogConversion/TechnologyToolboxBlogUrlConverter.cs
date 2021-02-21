@@ -1,7 +1,8 @@
-﻿using System;
+﻿using BlogML2Hugo.Core;
+using System;
 using System.IO;
 
-namespace BlogML2Hugo
+namespace TechnologyToolbox.SubtextToHugoBlogConversion
 {
     public class TechnologyToolboxBlogUrlConverter : IBlogUrlConverter
     {

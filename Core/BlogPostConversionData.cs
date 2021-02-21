@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace BlogML2Hugo
+namespace BlogML2Hugo.Core
 {
     public class BlogPostConversionData
     {

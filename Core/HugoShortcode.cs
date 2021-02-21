@@ -4,7 +4,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 
-namespace BlogML2Hugo
+namespace BlogML2Hugo.Core
 {
     public class HugoShortcode
     {

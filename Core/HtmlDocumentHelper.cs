@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 
-namespace BlogML2Hugo
+namespace BlogML2Hugo.Core
 {
     public static class HtmlDocumentHelper
     {

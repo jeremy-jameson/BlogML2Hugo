@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BlogML2Hugo
+namespace BlogML2Hugo.Core
 {
     public class SlugDeterminationStep : IBlogPostConversionStep
     {

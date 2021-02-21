@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Xml;
 
-namespace BlogML2Hugo
+namespace BlogML2Hugo.Core
 {
-    class TagExtractionStep : IBlogPostConversionStep
+    public class TagExtractionStep : IBlogPostConversionStep
     {
         private readonly XmlDocument _blogMLDoc;
 
