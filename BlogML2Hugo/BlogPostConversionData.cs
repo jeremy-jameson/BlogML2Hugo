@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace BlogML2Hugo
 {
-    public class PostConversionData
+    public class BlogPostConversionData
     {
         private readonly string _outputDirectory;
         private readonly BlogMLPost _post;
@@ -25,7 +25,7 @@ namespace BlogML2Hugo
 
         public List<string> Tags { get; private set; }
 
-        public PostConversionData(BlogMLPost post, string outputDirectory)
+        public BlogPostConversionData(BlogMLPost post, string outputDirectory)
         {
             if (post == null)
             {

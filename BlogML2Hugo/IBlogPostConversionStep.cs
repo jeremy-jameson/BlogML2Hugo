@@ -2,6 +2,6 @@
 {
     public interface IBlogPostConversionStep
     {
-        void Execute(PostConversionData postConversionData);
+        void Execute(BlogPostConversionData postConversionData);
     }
 }

@@ -82,7 +82,7 @@ namespace BlogML2Hugo
 
             blog.Posts.ForEach(post =>
             {
-                var postConversionData = new PostConversionData(post, outDir);
+                var postConversionData = new BlogPostConversionData(post, outDir);
 
                 IBlogPostConversionStep slugDeterminationStep =
                     new SlugDeterminationStep(blogUrlConverter);

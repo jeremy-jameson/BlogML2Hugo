@@ -12,7 +12,7 @@ namespace BlogML2Hugo
         {
         }
 
-        public override void Execute(PostConversionData postConversionData)
+        public override void Execute(BlogPostConversionData postConversionData)
         {
             base.Execute(postConversionData);
 

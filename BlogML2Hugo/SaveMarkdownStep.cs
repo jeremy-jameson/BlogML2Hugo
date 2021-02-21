@@ -7,7 +7,7 @@ namespace BlogML2Hugo
 {
     public class SaveMarkdownStep : IBlogPostConversionStep
     {
-        public void Execute(PostConversionData postConversionData)
+        public void Execute(BlogPostConversionData postConversionData)
         {
             var post = postConversionData.Post;
 
@@ -27,7 +27,7 @@ namespace BlogML2Hugo
 
         static void WriteConvertedMarkdown(
             string outDir,
-            PostConversionData postConversionData,
+            BlogPostConversionData postConversionData,
             string header)
         {
             var outputFile = Path.Combine(outDir, postConversionData.Slug + ".md");
@@ -52,7 +52,7 @@ namespace BlogML2Hugo
 
         static string ComposeBlogHeader(
             BlogMLPost post,
-            PostConversionData postConversionData)
+            BlogPostConversionData postConversionData)
         {
             var header = new StringBuilder("---");
             header.AppendLine();

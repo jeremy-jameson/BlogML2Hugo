@@ -17,7 +17,7 @@ namespace BlogML2Hugo
             _blogUrlConverter = blogUrlConverter;
         }
 
-        public void Execute(PostConversionData postConversionData)
+        public void Execute(BlogPostConversionData postConversionData)
         {
             var postUrl = new Uri(postConversionData.Post.PostUrl);
 

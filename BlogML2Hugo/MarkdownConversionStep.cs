@@ -4,7 +4,7 @@ namespace BlogML2Hugo
 {
     public class MarkdownConversionStep : IBlogPostConversionStep
     {
-        public void Execute(PostConversionData postConversionData)
+        public void Execute(BlogPostConversionData postConversionData)
         {
             var post = postConversionData.Post;
 

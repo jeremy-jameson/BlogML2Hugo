@@ -19,7 +19,7 @@ namespace BlogML2Hugo
             _categories = categories;
         }
 
-        public void Execute(PostConversionData postConversionData)
+        public void Execute(BlogPostConversionData postConversionData)
         {
             var post = postConversionData.Post;
 

@@ -17,7 +17,7 @@ namespace BlogML2Hugo
             _blogMLDoc = blogMLDoc;
         }
 
-        public virtual void Execute(PostConversionData postConversionData)
+        public virtual void Execute(BlogPostConversionData postConversionData)
         {
             if (postConversionData == null)
             {

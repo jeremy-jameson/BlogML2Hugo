@@ -4,7 +4,7 @@ namespace BlogML2Hugo
 {
     public class MarkdownNormalizationStep : IBlogPostConversionStep
     {
-        public void Execute(PostConversionData postConversionData)
+        public void Execute(BlogPostConversionData postConversionData)
         {
             var markdown = Markdown.Normalize(postConversionData.Markdown);
 
