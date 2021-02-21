@@ -98,7 +98,7 @@ namespace BlogML2Hugo
                     .AddStep(new FixHtmlFormattingIssuesStep())
                     .AddStep(new TechnologyToolboxBlogPostPreprocessor(
                         linkMapper))
-                    .AddStep(new MarkdownConversionStep())
+                    .AddStep(new ReverseMarkdownConversionStep())
                     .AddStep(new MarkdownNormalizationStep())
                     .AddStep(new CategoryLookupStep(categories))
                     .AddStep(new SaveMarkdownStep())

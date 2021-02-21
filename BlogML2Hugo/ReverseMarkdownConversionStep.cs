@@ -3,7 +3,7 @@ using ReverseMarkdown;
 
 namespace BlogML2Hugo
 {
-    public class MarkdownConversionStep : IBlogPostConversionStep
+    public class ReverseMarkdownConversionStep : IBlogPostConversionStep
     {
         public void Execute(BlogPostConversionData postConversionData)
         {
