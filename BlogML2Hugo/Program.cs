@@ -106,6 +106,7 @@ namespace BlogML2Hugo
                     .AddStep(new MarkdownNormalizationStep())
                     .AddStep(new CategoryLookupStep(categories))
                     .AddStep(new SaveMarkdownStep())
+                    .AddStep(new CreateBlogArchivePagesStep())
                     .Build();
 
                 pipeline.Execute();
