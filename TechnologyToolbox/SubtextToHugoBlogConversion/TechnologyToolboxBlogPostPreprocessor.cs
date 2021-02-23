@@ -409,9 +409,6 @@ namespace TechnologyToolbox.SubtextToHugoBlogConversion
                             newElement.AppendChild(childNode);
                         });
 
-                        HtmlDocumentHelper.NormalizeWhitespaceInChildTextNodes(
-                            newElement);
-
                         noteBody.AppendChild(newElement);
                     }
                 }
