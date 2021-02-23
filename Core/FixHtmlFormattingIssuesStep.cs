@@ -41,12 +41,18 @@ namespace BlogML2Hugo.Core
             // This is necessary to avoid issues where whitespace within <code>
             // elements is removed by ReverseMarkdown.
 
-            var nodes = doc.DocumentNode.SelectNodes("//p/code");
+            var nodes = doc.DocumentNode.SelectNodes("//code");
 
             if (nodes != null)
             {
                 foreach (var node in nodes)
                 {
+                    // No need to fix spaces anywhere within <pre>
+                    if (node.Ancestors("pre").Any() == true)
+                    {
+                        continue;
+                    }
+
                     HtmlDocumentHelper.MoveLeadingWhitespaceToParent(node);
                     HtmlDocumentHelper.MoveTrailingWhitespaceToParent(node);
                 }
@@ -67,12 +73,18 @@ namespace BlogML2Hugo.Core
             // whitespace within <span> elements inside <code> elements is removed by
             // ReverseMarkdown.
 
-            var nodes = doc.DocumentNode.SelectNodes("//p/code/span");
+            var nodes = doc.DocumentNode.SelectNodes("//code/span");
 
             if (nodes != null)
             {
                 foreach (var node in nodes)
                 {
+                    // No need to fix spaces anywhere within <pre>
+                    if (node.Ancestors("pre").Any() == true)
+                    {
+                        continue;
+                    }
+
                     var spanNode = node;
                     var codeNode = node.ParentNode;
 
