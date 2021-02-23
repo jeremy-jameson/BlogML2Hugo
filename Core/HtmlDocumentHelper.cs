@@ -73,6 +73,56 @@ namespace BlogML2Hugo.Core
             }
         }
 
+        public static void MoveLeadingWhitespaceToParent(
+            HtmlNode node)
+        {
+            if (node == null)
+            {
+                throw new ArgumentNullException("node");
+            }
+
+            if (node.FirstChild != null
+                && node.FirstChild.Name == "#text")
+            {
+                var textNode = node.FirstChild;
+
+                var trimmedText = textNode.InnerText.TrimStart();
+
+                if (trimmedText != textNode.InnerText)
+                {
+                    HtmlDocumentHelper.EnsureWhitespaceBeforeElement(
+                        node);
+
+                    textNode.InnerHtml = trimmedText;
+                }
+            }
+        }
+
+        public static void MoveTrailingWhitespaceToParent(
+            HtmlNode node)
+        {
+            if (node == null)
+            {
+                throw new ArgumentNullException("node");
+            }
+
+            if (node.LastChild != null
+                && node.LastChild.Name == "#text")
+            {
+                var textNode = node.LastChild;
+
+                var trimmedText = textNode.InnerText.TrimEnd();
+
+                if (trimmedText != textNode.InnerText)
+                {
+                    HtmlDocumentHelper.EnsureWhitespaceAfterElement(
+                        node);
+
+                    textNode.InnerHtml = trimmedText;
+                }
+            }
+        }
+
         public static string NormalizeWhitespace(
             string html)
         {

@@ -84,39 +84,9 @@ namespace BlogML2Hugo.Core
                     || node.Name == "i"
                     || node.Name == "strong");
 
-                var emphasisNode = node;
+                HtmlDocumentHelper.MoveLeadingWhitespaceToParent(node);
 
-                if (emphasisNode.FirstChild != null
-                    && emphasisNode.FirstChild.Name == "#text")
-                {
-                    var textNode = emphasisNode.FirstChild;
-
-                    var trimmedText = textNode.InnerText.TrimStart();
-
-                    if (trimmedText != textNode.InnerText)
-                    {
-                        HtmlDocumentHelper.EnsureWhitespaceBeforeElement(
-                            emphasisNode);
-
-                        textNode.InnerHtml = trimmedText;
-                    }
-                }
-
-                if (emphasisNode.LastChild != null
-                    && emphasisNode.LastChild.Name == "#text")
-                {
-                    var textNode = emphasisNode.LastChild;
-
-                    var trimmedText = textNode.InnerText.TrimEnd();
-
-                    if (trimmedText != textNode.InnerText)
-                    {
-                        HtmlDocumentHelper.EnsureWhitespaceAfterElement(
-                            emphasisNode);
-
-                        textNode.InnerHtml = trimmedText;
-                    }
-                }
+                HtmlDocumentHelper.MoveTrailingWhitespaceToParent(node);
             }
         }
 
