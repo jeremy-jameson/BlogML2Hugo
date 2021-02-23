@@ -84,6 +84,8 @@ namespace BlogML2Hugo.Core
                     || node.Name == "i"
                     || node.Name == "strong");
 
+                var emphasisNode = node;
+
                 node.ChildNodes.ToList().ForEach((child) =>
                 {
                     if (child.Name == "#text")
@@ -92,8 +94,6 @@ namespace BlogML2Hugo.Core
 
                         if (trimmedText != child.InnerText)
                         {
-                            var emphasisNode = child.ParentNode;
-
                             HtmlDocumentHelper.EnsureWhitespaceBeforeElement(
                                 emphasisNode);
 
@@ -104,8 +104,6 @@ namespace BlogML2Hugo.Core
 
                         if (trimmedText != child.InnerText)
                         {
-                            var emphasisNode = child.ParentNode;
-
                             HtmlDocumentHelper.EnsureWhitespaceAfterElement(
                                 emphasisNode);
 
