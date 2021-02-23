@@ -372,13 +372,14 @@ namespace TechnologyToolbox.SubtextToHugoBlogConversion
             //   <blockquote class="note important">
             //       <div class="noteTitle">
             //         <strong>Important</strong></div>
-            //       <div class="noteBody">
-            //         <p>Lorem ipsum dolor sit amet...</p></div>
+            //       <div class="noteBody">Lorem ipsum
+            //         dolor sit amet...
+            //       </div>
             //   </blockquote>
             //
-            // Note that without the <p> element in the note body, the Markdown
-            // conversion results in extra indentation -- which causes the note
-            // body to sometimes be interpreted as code.
+            // Note that with leading whitespace in the note body, the Markdown
+            // conversion results in extra indentation -- which sometimes
+            // causes the content to be interpreted as code.
 
             var elements = doc.DocumentNode.SelectNodes(
 "//blockquote[starts-with(@class, 'note')]/div[@class != 'noteTitle']");
@@ -400,29 +401,6 @@ namespace TechnologyToolbox.SubtextToHugoBlogConversion
                         var textNode = element.FirstChild;
 
                         textNode.InnerHtml = textNode.InnerHtml.TrimStart();
-                    }
-
-                    if (elementClass != "noteBody")
-                    {
-                        continue;
-                    }
-
-                    var noteBody = element;
-
-                    if (noteBody.FirstChild != null
-                        && noteBody.FirstChild.Name == "#text"
-                        && noteBody.ChildNodes.Count() == 1)
-                    {
-                        var newElement = doc.CreateElement("p");
-
-                        noteBody.ChildNodes.ToList().ForEach(childNode =>
-                        {
-                            childNode.Remove();
-
-                            newElement.AppendChild(childNode);
-                        });
-
-                        noteBody.AppendChild(newElement);
                     }
                 }
             }
