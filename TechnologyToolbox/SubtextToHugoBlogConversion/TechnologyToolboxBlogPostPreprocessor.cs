@@ -891,6 +891,7 @@ namespace TechnologyToolbox.SubtextToHugoBlogConversion
                     {
                         var imgSrc = img.GetAttributeValue("src", null);
                         var imgAlt = img.GetAttributeValue("alt", null);
+                        var imgClass = img.GetAttributeValue("class", null);
                         var imgHeight = img.GetAttributeValue("height", null);
                         var imgWidth = img.GetAttributeValue("width", null);
                         var imgTitle = img.GetAttributeValue("title", null);
@@ -908,6 +909,7 @@ namespace TechnologyToolbox.SubtextToHugoBlogConversion
                             .WithName("figure")
                             .WithParameter("src", imgSrc)
                             .WithParameter("alt", imgAlt)
+                            .WithParameter("class", imgClass)
                             .WithParameter("height", imgHeight)
                             .WithParameter("width", imgWidth)
                             .WithParameter("title", imgTitle)
