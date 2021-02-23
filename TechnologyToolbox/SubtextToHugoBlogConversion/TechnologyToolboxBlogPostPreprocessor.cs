@@ -387,9 +387,18 @@ namespace TechnologyToolbox.SubtextToHugoBlogConversion
             {
                 foreach (var element in elements)
                 {
+                    var elementClass = element.GetAttributeValue("class", null);
+
+                    if (elementClass != "noteBody")
+                    {
+                        continue;
+                    }
+
                     var noteBody = element;
 
-                    if (noteBody.FirstChild.Name != "p")
+                    if (noteBody.FirstChild != null
+                        && noteBody.FirstChild.Name == "#text"
+                        && noteBody.ChildNodes.Count() == 1)
                     {
                         var newElement = doc.CreateElement("p");
 
@@ -400,8 +409,8 @@ namespace TechnologyToolbox.SubtextToHugoBlogConversion
                             newElement.AppendChild(childNode);
                         });
 
-                        HtmlDocumentHelper.NormalizeWhitespaceInChildTextNodes(
-                            newElement);
+                        //HtmlDocumentHelper.NormalizeWhitespaceInChildTextNodes(
+                        //    newElement);
 
                         noteBody.AppendChild(newElement);
                     }
