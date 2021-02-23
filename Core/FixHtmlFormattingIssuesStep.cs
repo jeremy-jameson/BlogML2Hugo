@@ -93,31 +93,11 @@ namespace BlogML2Hugo.Core
                         if (trimmedText != child.InnerText)
                         {
                             var emphasisNode = child.ParentNode;
-                            HtmlNode whitespaceTextNode = null;
 
-                            if (emphasisNode.PreviousSibling != null
-                                && emphasisNode.PreviousSibling.Name == "#text")
-                            {
-                                var textNode = emphasisNode.PreviousSibling;
-
-                                if (textNode.InnerText.TrimEnd()
-                                    != textNode.InnerText)
-                                {
-                                    whitespaceTextNode = textNode;
-                                }
-                            }
+                            HtmlDocumentHelper.EnsureWhitespaceBeforeElement(
+                                emphasisNode);
 
                             child.InnerHtml = trimmedText;
-
-                            if (whitespaceTextNode == null)
-                            {
-                                whitespaceTextNode = node.OwnerDocument
-                                    .CreateTextNode(" ");
-
-                                node.ParentNode.InsertBefore(
-                                    whitespaceTextNode,
-                                    node);
-                            }
                         }
 
                         trimmedText = child.InnerText.TrimEnd();
@@ -125,31 +105,11 @@ namespace BlogML2Hugo.Core
                         if (trimmedText != child.InnerText)
                         {
                             var emphasisNode = child.ParentNode;
-                            HtmlNode whitespaceTextNode = null;
 
-                            if (emphasisNode.NextSibling != null
-                                && emphasisNode.NextSibling.Name == "#text")
-                            {
-                                var textNode = emphasisNode.NextSibling;
-
-                                if (textNode.InnerText.TrimStart()
-                                    != textNode.InnerText)
-                                {
-                                    whitespaceTextNode = textNode;
-                                }
-                            }
+                            HtmlDocumentHelper.EnsureWhitespaceAfterElement(
+                                emphasisNode);
 
                             child.InnerHtml = trimmedText;
-
-                            if (whitespaceTextNode == null)
-                            {
-                                whitespaceTextNode = node.OwnerDocument
-                                    .CreateTextNode(" ");
-
-                                node.ParentNode.InsertAfter(
-                                    whitespaceTextNode,
-                                    node);
-                            }
                         }
                     }
                 });
