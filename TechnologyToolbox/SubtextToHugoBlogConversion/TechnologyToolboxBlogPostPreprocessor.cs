@@ -378,16 +378,29 @@ namespace TechnologyToolbox.SubtextToHugoBlogConversion
             //
             // Note that without the <p> element in the note body, the Markdown
             // conversion results in extra indentation -- which causes the note
-            // body to be interpreted as code.
+            // body to sometimes be interpreted as code.
 
             var elements = doc.DocumentNode.SelectNodes(
-                "//blockquote[starts-with(@class, 'note')]/div[@class != 'noteTitle']");
+"//blockquote[starts-with(@class, 'note')]/div[@class != 'noteTitle']");
 
             if (elements != null)
             {
                 foreach (var element in elements)
                 {
                     var elementClass = element.GetAttributeValue("class", null);
+
+                    // Always trim leading whitespace from first text node in
+                    // the <div>. This is harmless (since the text is the first
+                    // element in a block-level element) and fixes a number of
+                    // formatting inconsistencies in the source content.
+
+                    if (element.FirstChild != null
+                        && element.FirstChild.Name == "#text")
+                    {
+                        var textNode = element.FirstChild;
+
+                        textNode.InnerHtml = textNode.InnerHtml.TrimStart();
+                    }
 
                     if (elementClass != "noteBody")
                     {
