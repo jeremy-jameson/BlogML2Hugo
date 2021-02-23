@@ -3,7 +3,7 @@ using BlogML.Xml;
 
 namespace BlogML2Hugo.Core
 {
-    public class ReverseMarkdownDecodingStep : IBlogPostConversionStep
+    public class ReverseMarkdownPostprocessingStep : IBlogPostConversionStep
     {
         public void Execute(BlogPostConversionData postConversionData)
         {
