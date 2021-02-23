@@ -611,9 +611,24 @@ namespace TechnologyToolbox.SubtextToHugoBlogConversion
                         // Example blog post where this occurs:
                         //
                         // https://www.technologytoolbox.com/blog/jjameson/archive/2010/02/28/lessons-learned-moving-tfs-to-windows-server-2008-and-sql-server-2008.aspx
+                        //
+                        // Check the length of the <kbd> content. If it is
+                        // relatively long -- say, more than 50 characters --
+                        // then convert it to a <p> element rather than wrapping
+                        // it in a <pre> element.
+                        //
+                        // For "short" commands, converting to fenced-code
+                        // blocks in Markdown is preferred because it preserves
+                        // the correct indentation level for content in lists --
+                        // such as in the following blog post:
+                        //
+                        // https://www.technologytoolbox.com/blog/jjameson/archive/2010/12/02/web-standards-design-with-sharepoint-part-2.aspx
 
-                        element.Name = "p";
-                        continue;
+                        if (element.InnerHtml.Length > 50)
+                        {
+                            element.Name = "p";
+                            continue;
+                        }
                     }
 
                     HtmlNode preElement = null;
