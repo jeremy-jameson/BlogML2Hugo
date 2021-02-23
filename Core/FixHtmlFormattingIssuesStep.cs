@@ -18,6 +18,7 @@ namespace BlogML2Hugo.Core
             htmlDoc.LoadHtml(postHtml);
 
             FixSpacesInCodeElements(htmlDoc);
+            FixSpacesInCodeSpanElements(htmlDoc);
             FixSpacesInEmphasisElements(htmlDoc);
 
             FixSpacesInTableCells(htmlDoc);
@@ -28,6 +29,31 @@ namespace BlogML2Hugo.Core
         }
 
         private static void FixSpacesInCodeElements(HtmlDocument doc)
+        {
+            // Replaces HTML content similar to the following:
+            //
+            //   ...the<code style="COLOR: #2b91af"> ExpectedException </code>attribute...
+            //
+            // with:
+            //
+            //   ...the <code style="COLOR: #2b91af">ExpectedException</code> attribute...
+            //
+            // This is necessary to avoid issues where whitespace within <code>
+            // elements is removed by ReverseMarkdown.
+
+            var nodes = doc.DocumentNode.SelectNodes("//p/code");
+
+            if (nodes != null)
+            {
+                foreach (var node in nodes)
+                {
+                    HtmlDocumentHelper.MoveLeadingWhitespaceToParent(node);
+                    HtmlDocumentHelper.MoveTrailingWhitespaceToParent(node);
+                }
+            }
+        }
+
+        private static void FixSpacesInCodeSpanElements(HtmlDocument doc)
         {
             // Replaces HTML content similar to the following:
             //
