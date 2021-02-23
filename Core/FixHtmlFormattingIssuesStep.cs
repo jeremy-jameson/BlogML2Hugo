@@ -86,31 +86,37 @@ namespace BlogML2Hugo.Core
 
                 var emphasisNode = node;
 
-                node.ChildNodes.ToList().ForEach((child) =>
+                if (emphasisNode.FirstChild != null
+                    && emphasisNode.FirstChild.Name == "#text")
                 {
-                    if (child.Name == "#text")
+                    var child = emphasisNode.FirstChild;
+
+                    var trimmedText = child.InnerText.TrimStart();
+
+                    if (trimmedText != child.InnerText)
                     {
-                        var trimmedText = child.InnerText.TrimStart();
+                        HtmlDocumentHelper.EnsureWhitespaceBeforeElement(
+                            emphasisNode);
 
-                        if (trimmedText != child.InnerText)
-                        {
-                            HtmlDocumentHelper.EnsureWhitespaceBeforeElement(
-                                emphasisNode);
-
-                            child.InnerHtml = trimmedText;
-                        }
-
-                        trimmedText = child.InnerText.TrimEnd();
-
-                        if (trimmedText != child.InnerText)
-                        {
-                            HtmlDocumentHelper.EnsureWhitespaceAfterElement(
-                                emphasisNode);
-
-                            child.InnerHtml = trimmedText;
-                        }
+                        child.InnerHtml = trimmedText;
                     }
-                });
+                }
+
+                if (emphasisNode.LastChild != null
+                    && emphasisNode.LastChild.Name == "#text")
+                {
+                    var child = emphasisNode.LastChild;
+
+                    var trimmedText = child.InnerText.TrimEnd();
+
+                    if (trimmedText != child.InnerText)
+                    {
+                        HtmlDocumentHelper.EnsureWhitespaceAfterElement(
+                            emphasisNode);
+
+                        child.InnerHtml = trimmedText;
+                    }
+                }
             }
         }
 
