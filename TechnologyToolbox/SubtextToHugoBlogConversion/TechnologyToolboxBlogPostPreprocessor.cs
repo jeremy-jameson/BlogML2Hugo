@@ -590,6 +590,32 @@ namespace TechnologyToolbox.SubtextToHugoBlogConversion
                 {
                     var parent = element.ParentNode;
 
+                    if (parent.ChildNodes.Count == 2
+                        && parent.ChildNodes[0].Name == "#text"
+                        && string.IsNullOrWhiteSpace(
+                            parent.ChildNodes[0].InnerHtml) == true
+                        && parent.ChildNodes[1].Name == "kbd")
+                    {
+                        // The console block contains only a single <kbd>
+                        // element (preceded by some insignificant whitespace).
+                        // This is likely a single line command like:
+                        //
+                        //   SetupWarehouse.exe -o -s beast -d TfsWarehouse ...
+                        //
+                        // Rather than converting this to a fenced-code block
+                        // (by inserting a <pre> element) which would require
+                        // horizontal scrolling to view a long line of text,
+                        // change the <kbd> element to <p> so the text in the
+                        // console block can wrap onto multiple lines.
+                        //
+                        // Example blog post where this occurs:
+                        //
+                        // https://www.technologytoolbox.com/blog/jjameson/archive/2010/02/28/lessons-learned-moving-tfs-to-windows-server-2008-and-sql-server-2008.aspx
+
+                        element.Name = "p";
+                        continue;
+                    }
+
                     HtmlNode preElement = null;
 
                     if (element.ParentNode.LastChild.Name == "pre")
