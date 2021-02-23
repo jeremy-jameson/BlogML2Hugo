@@ -17,6 +17,7 @@ namespace BlogML2Hugo.Core
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(postHtml);
 
+            FixSpacesInCodeElements(htmlDoc);
             FixSpacesInEmphasisElements(htmlDoc);
 
             FixSpacesInTableCells(htmlDoc);
@@ -24,6 +25,38 @@ namespace BlogML2Hugo.Core
             post.Content = BlogMLContent.Create(
                 htmlDoc.DocumentNode.OuterHtml,
                 ContentTypes.Html);
+        }
+
+        private static void FixSpacesInCodeElements(HtmlDocument doc)
+        {
+            // Replaces HTML content similar to the following:
+            //
+            //   ...changing<code><span style="COLOR: #2b91af"> ReportingService </span></code>references...
+            //
+            // with:
+            //
+            //   ...changing <code><span style="COLOR: #2b91af">ReportingService</span></code> references...
+            //
+            // This is necessary to avoid issues where leading and trailing
+            // whitespace within <span> elements inside <code> elements is removed by
+            // ReverseMarkdown.
+
+            var nodes = doc.DocumentNode.SelectNodes("//p/code/span");
+
+            if (nodes != null)
+            {
+                foreach (var node in nodes)
+                {
+                    var spanNode = node;
+                    var codeNode = node.ParentNode;
+
+                    HtmlDocumentHelper.MoveLeadingWhitespaceToParent(spanNode);
+                    HtmlDocumentHelper.MoveTrailingWhitespaceToParent(spanNode);
+
+                    HtmlDocumentHelper.MoveLeadingWhitespaceToParent(codeNode);
+                    HtmlDocumentHelper.MoveTrailingWhitespaceToParent(codeNode);
+                }
+            }
         }
 
         private static void FixSpacesInEmphasisElements(HtmlDocument doc)
