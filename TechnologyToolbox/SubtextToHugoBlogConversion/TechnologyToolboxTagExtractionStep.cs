@@ -39,7 +39,8 @@ namespace TechnologyToolbox.SubtextToHugoBlogConversion
             //    <h3>
             //      Tags</h3>
             //    <ul>
-            //      <li><a href="..." rel="tag">My System</a></li>
+            //      <li><a href="..." rel="tag">    My
+            //        System    </a></li>
             //      <li><a href="..." rel="tag">Toolbox</a></li>
             //    </ul>
             //
@@ -55,7 +56,10 @@ namespace TechnologyToolbox.SubtextToHugoBlogConversion
             {
                 foreach (var tagLink in tagLinks)
                 {
-                    tags.Add(tagLink.InnerText);
+                    var tag = HtmlDocumentHelper.NormalizeWhitespace(
+                        tagLink.InnerText).Trim();
+
+                    tags.Add(tag);
                 }
             }
 
