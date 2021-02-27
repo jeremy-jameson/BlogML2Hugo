@@ -1,6 +1,10 @@
 ﻿using BlogML;
 using BlogML.Xml;
 using Markdig;
+using Markdig.Renderers.Normalize;
+using Markdig.Syntax;
+using System.IO;
+using System.Linq;
 
 namespace BlogML2Hugo.Core
 {
@@ -10,7 +14,23 @@ namespace BlogML2Hugo.Core
         {
             var markdown = postConversionData.Post.Content.UncodedText;
 
-            markdown = Markdown.Normalize(markdown);
+            var document = Markdown.Parse(markdown);
+
+            RemoveTrailingWhitespaceFromFencedCodeBlocks(document);
+
+            using (var stringWriter = new StringWriter())
+            {
+                var renderer = new NormalizeRenderer(stringWriter);
+
+                var pipeline = new MarkdownPipelineBuilder()
+                    .Build();
+
+                pipeline.Setup(renderer);
+                renderer.Render(document);
+                stringWriter.Flush();
+
+                markdown = stringWriter.ToString();
+            }
 
             markdown = RemoveTrailingSpacesFromEmptyBlockquoteLines(
                 markdown);
@@ -31,6 +51,24 @@ namespace BlogML2Hugo.Core
             }
 
             return markdown.Replace("\n> \n", "\n>\n");
+        }
+
+        private static void RemoveTrailingWhitespaceFromFencedCodeBlock(FencedCodeBlock block)
+        {
+            for (int i = 0; i < block.Lines.Count; i++)
+            {
+                block.Lines.Lines[i].Slice.TrimEnd();
+            }
+        }
+
+        private static void RemoveTrailingWhitespaceFromFencedCodeBlocks(
+            MarkdownDocument document)
+        {
+            document.Descendants<FencedCodeBlock>()
+                .ToList()
+                .ForEach(block =>
+                    RemoveTrailingWhitespaceFromFencedCodeBlock(block)
+                );
         }
     }
 }
