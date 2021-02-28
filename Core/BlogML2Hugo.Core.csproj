@@ -9,7 +9,10 @@
     <PackageReference Include="blogml" Version="2.2.0" />
     <PackageReference Include="Html2Markdown" Version="3.2.1.341" />
     <PackageReference Include="Markdig" Version="0.23.0" />
-    <PackageReference Include="ReverseMarkdown" Version="3.18.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\reversemarkdown-net\src\ReverseMarkdown\ReverseMarkdown.csproj" />
   </ItemGroup>
 
 </Project>

@@ -4,9 +4,13 @@ VisualStudioVersion = 16.0.30717.126
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlogML2Hugo", "BlogML2Hugo\BlogML2Hugo.csproj", "{07E08418-4AFB-41D7-837B-0E822F0CC587}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechnologyToolbox.SubtextToHugoBlogConversion", "TechnologyToolbox\SubtextToHugoBlogConversion\TechnologyToolbox.SubtextToHugoBlogConversion.csproj", "{9377B123-7924-435A-AB6B-3D11F359E45D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TechnologyToolbox.SubtextToHugoBlogConversion", "TechnologyToolbox\SubtextToHugoBlogConversion\TechnologyToolbox.SubtextToHugoBlogConversion.csproj", "{9377B123-7924-435A-AB6B-3D11F359E45D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogML2Hugo.Core", "Core\BlogML2Hugo.Core.csproj", "{B2669205-BFE4-4958-9185-96AE8A63FC96}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlogML2Hugo.Core", "Core\BlogML2Hugo.Core.csproj", "{B2669205-BFE4-4958-9185-96AE8A63FC96}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReverseMarkdown", "reversemarkdown-net\src\ReverseMarkdown\ReverseMarkdown.csproj", "{55E06D92-A91E-4E82-8C3E-FC554EF1124D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReverseMarkdown.Test", "reversemarkdown-net\src\ReverseMarkdown.Test\ReverseMarkdown.Test.csproj", "{AD8A469B-7290-49B9-BC36-84378210B023}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,6 +58,30 @@ Global
 		{B2669205-BFE4-4958-9185-96AE8A63FC96}.Release|x64.Build.0 = Release|Any CPU
 		{B2669205-BFE4-4958-9185-96AE8A63FC96}.Release|x86.ActiveCfg = Release|Any CPU
 		{B2669205-BFE4-4958-9185-96AE8A63FC96}.Release|x86.Build.0 = Release|Any CPU
+		{55E06D92-A91E-4E82-8C3E-FC554EF1124D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55E06D92-A91E-4E82-8C3E-FC554EF1124D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55E06D92-A91E-4E82-8C3E-FC554EF1124D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{55E06D92-A91E-4E82-8C3E-FC554EF1124D}.Debug|x64.Build.0 = Debug|Any CPU
+		{55E06D92-A91E-4E82-8C3E-FC554EF1124D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{55E06D92-A91E-4E82-8C3E-FC554EF1124D}.Debug|x86.Build.0 = Debug|Any CPU
+		{55E06D92-A91E-4E82-8C3E-FC554EF1124D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55E06D92-A91E-4E82-8C3E-FC554EF1124D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55E06D92-A91E-4E82-8C3E-FC554EF1124D}.Release|x64.ActiveCfg = Release|Any CPU
+		{55E06D92-A91E-4E82-8C3E-FC554EF1124D}.Release|x64.Build.0 = Release|Any CPU
+		{55E06D92-A91E-4E82-8C3E-FC554EF1124D}.Release|x86.ActiveCfg = Release|Any CPU
+		{55E06D92-A91E-4E82-8C3E-FC554EF1124D}.Release|x86.Build.0 = Release|Any CPU
+		{AD8A469B-7290-49B9-BC36-84378210B023}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD8A469B-7290-49B9-BC36-84378210B023}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD8A469B-7290-49B9-BC36-84378210B023}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AD8A469B-7290-49B9-BC36-84378210B023}.Debug|x64.Build.0 = Debug|Any CPU
+		{AD8A469B-7290-49B9-BC36-84378210B023}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AD8A469B-7290-49B9-BC36-84378210B023}.Debug|x86.Build.0 = Debug|Any CPU
+		{AD8A469B-7290-49B9-BC36-84378210B023}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD8A469B-7290-49B9-BC36-84378210B023}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD8A469B-7290-49B9-BC36-84378210B023}.Release|x64.ActiveCfg = Release|Any CPU
+		{AD8A469B-7290-49B9-BC36-84378210B023}.Release|x64.Build.0 = Release|Any CPU
+		{AD8A469B-7290-49B9-BC36-84378210B023}.Release|x86.ActiveCfg = Release|Any CPU
+		{AD8A469B-7290-49B9-BC36-84378210B023}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
