@@ -1,0 +1,3 @@
+[submodule "reversemarkdown-net"]
+	path = reversemarkdown-net
+	url = https://github.com/jeremy-jameson/reversemarkdown-net.git
