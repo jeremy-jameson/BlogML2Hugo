@@ -16,25 +16,9 @@ namespace BlogML2Hugo.Core
             markdown = ReverseMarkdownHelper
                 .DecodeAfterConversion(markdown);
 
-            markdown = RemovePlaceholderParagraphsForBlockquotesInLists(
-                markdown);
-
             post.Content = BlogMLContent.Create(
                 markdown,
                 ContentTypes.Text);
-        }
-
-        private string RemovePlaceholderParagraphsForBlockquotesInLists(
-            string markdown)
-        {
-            var filteredMarkdown = markdown.Split(
-                new string[] { Environment.NewLine },
-                StringSplitOptions.None)
-                .ToList()
-                .Where(x => x.Trim() != "{{< reverse-markdown-hack >}}")
-                .ToArray();
-
-            return string.Join(Environment.NewLine, filteredMarkdown);
         }
     }
 }
