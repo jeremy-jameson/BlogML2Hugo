@@ -143,6 +143,7 @@ namespace TechnologyToolbox.SubtextToHugoBlogConversion
             ProcessBlogKbdContentInsideConsoleBlocks(doc);
 
             ProcessBlogConsoleBlocks(doc);
+            ProcessBlogDocumentBlocks(doc);
             ProcessBlogLineThroughContent(doc);
             ProcessBlogLogExcerpts(doc);
             ReplaceBlogKbdElements(doc);
@@ -467,6 +468,70 @@ namespace TechnologyToolbox.SubtextToHugoBlogConversion
                         .ForHtmlDocument(element.OwnerDocument)
                         .WithHtmlNodeName("div")
                         .WithName("console-block-end")
+                        .Build();
+
+                    paragraph = element.OwnerDocument.CreateElement("p");
+
+                    paragraph.ChildNodes.Add(shortcodeNode);
+
+                    element.ParentNode.InsertAfter(paragraph, element);
+                }
+            }
+        }
+
+        private static void ProcessBlogDocumentBlocks(HtmlDocument doc)
+        {
+            // Replaces blog post content similar to the following:
+            //
+            //   <div class="document">
+            //     ...
+            //   </div>
+            //
+            // with:
+            //
+            //   {{< article-block-start "document numbered-headings" >}}
+            //
+            //   <div class="document">
+            //     ...
+            //   </div>
+            //
+            //   {{< article-block-end >}}
+
+            var elements = doc.DocumentNode.SelectNodes("//div[@class = 'document']");
+
+            if (elements != null)
+            {
+                foreach (var element in elements)
+                {
+                    // Insert paragraph containing Hugo shortcode
+                    // "{{< article-block-start ... >}}" before the
+                    // <div class="document"> element
+
+                    var shortcodeBuilder = new HugoShortcodeNodeBuilder();
+
+                    var shortcodeNode = shortcodeBuilder
+                        .ForHtmlDocument(element.OwnerDocument)
+                        .WithHtmlNodeName("div")
+                        .WithName("article-block-start")
+                        .WithParameter("document numbered-headings")
+                        .Build();
+
+                    var paragraph = element.OwnerDocument.CreateElement("p");
+
+                    paragraph.ChildNodes.Add(shortcodeNode);
+
+                    element.ParentNode.InsertBefore(paragraph, element);
+
+                    // Insert paragraph containing Hugo shortcode
+                    // "{{< article-block-end >}}" after the
+                    // <div class="document"> element
+
+                    shortcodeBuilder = new HugoShortcodeNodeBuilder();
+
+                    shortcodeNode = shortcodeBuilder
+                        .ForHtmlDocument(element.OwnerDocument)
+                        .WithHtmlNodeName("div")
+                        .WithName("article-block-end")
                         .Build();
 
                     paragraph = element.OwnerDocument.CreateElement("p");
